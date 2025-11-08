@@ -1,0 +1,112 @@
+.topBar {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: #2c3e50;
+    color: white;
+    padding: 0 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 70px;
+}
+
+.topBar-brand h1 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    color: #ecf0f1;
+}
+
+.topBar-nav {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex: 1;
+    justify-content: space-between;
+    margin-left: 50px;
+}
+
+.topBar-nav-left,
+.topBar-nav-right {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.topBar-nav-right {
+    margin-left: auto;
+}
+
+.topBar li {
+    display: flex;
+    align-items: center;
+}
+
+.topBar a {
+    color: #ecf0f1;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.topBar a:hover {
+    background-color: #34495e;
+    color: #3498db;
+}
+
+/* Special styling for Login/Register or Profile/Logout */
+.topBar-nav-right li:last-child a {
+    background-color: #3498db;
+    color: white;
+}
+
+.topBar-nav-right li:last-child a:hover {
+    background-color: #2980b9;
+    color: white;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .topBar {
+        flex-direction: column;
+        padding: 15px 20px;
+        min-height: auto;
+    }
+
+    .topBar-brand {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 15px;
+    }
+
+    .topBar-nav {
+        flex-direction: column;
+        gap: 15px;
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .topBar-nav-left,
+    .topBar-nav-right {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .topBar-nav-right {
+        margin-left: 0;
+    }
+
+    .topBar a {
+        width: 100%;
+        text-align: center;
+    }
+}

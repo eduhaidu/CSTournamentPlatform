@@ -38,8 +38,6 @@ public class AdminService {
         admin.setPassword(passwordEncoder.encode(request.getPassword()));
         
         Admin savedAdmin = adminRepository.save(admin);
-        
-        // Generate JWT token
         String token = jwtService.generateToken(savedAdmin);
         
         return new AuthResponse(token, savedAdmin.getId(), savedAdmin.getUsername(), savedAdmin.getEmail());
