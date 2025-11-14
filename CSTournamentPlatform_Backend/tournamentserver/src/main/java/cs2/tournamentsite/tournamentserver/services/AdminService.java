@@ -19,6 +19,7 @@ public class AdminService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
+    private final NotificationService notificationService;
 
     public AuthResponse register(RegisterRequest request) {
         // Check if username already exists
@@ -39,6 +40,8 @@ public class AdminService {
         
         Admin savedAdmin = adminRepository.save(admin);
         String token = jwtService.generateToken(savedAdmin);
+        long expirationTime = jwtService.getJwtExpiration();
+        notificationService.scheduleSessionExpiryNotification(savedAdmin.getUsername(), expirationTime - 60000);
         
         return new AuthResponse(token, savedAdmin.getId(), savedAdmin.getUsername(), savedAdmin.getEmail());
     }
@@ -58,6 +61,10 @@ public class AdminService {
         
         // Generate JWT token
         String token = jwtService.generateToken(admin);
+
+        long expirationTime = jwtService.getJwtExpiration();
+        notificationService.scheduleSessionExpiryNotification(admin.getUsername(), expirationTime - 60000);
+
         
         return new AuthResponse(token, admin.getId(), admin.getUsername(), admin.getEmail());
     }

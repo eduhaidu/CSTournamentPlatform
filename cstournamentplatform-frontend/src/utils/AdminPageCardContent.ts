@@ -28,6 +28,18 @@ const AdminPageCardContent = [
         description: "Manage teams and rosters.",
         link: "/admin/teams",
         buttonText: "Go to Team Management"
+    },
+    {
+        title: "Reports & Analytics",
+        description: "Generate reports and view analytics.",
+        link: "/admin/reports",
+        buttonText: "Go to Reports & Analytics"
+    },
+    {
+        title: "Homepage",
+        description: "Return to the main homepage.",
+        link: "/",
+        buttonText: "Go to Homepage"
     }
 ];
 
