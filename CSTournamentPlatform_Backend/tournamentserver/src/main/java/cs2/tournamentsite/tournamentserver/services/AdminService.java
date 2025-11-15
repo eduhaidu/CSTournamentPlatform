@@ -21,6 +21,8 @@ public class AdminService {
     private final AuthenticationManager authenticationManager;
     private final NotificationService notificationService;
 
+    private int testingExpirationTime = 10000; // 10 seconds for testing
+
     public AuthResponse register(RegisterRequest request) {
         // Check if username already exists
         if (adminRepository.existsByUsername(request.getUsername())) {
@@ -41,7 +43,10 @@ public class AdminService {
         Admin savedAdmin = adminRepository.save(admin);
         String token = jwtService.generateToken(savedAdmin);
         long expirationTime = jwtService.getJwtExpiration();
-        notificationService.scheduleSessionExpiryNotification(savedAdmin.getUsername(), expirationTime - 60000);
+        //notificationService.scheduleSessionExpiryNotification(admin.getUsername(), expirationTime - 60000);
+
+        // For testing, use short expiration
+        notificationService.scheduleSessionExpiryNotification(admin.getUsername(), testingExpirationTime);
         
         return new AuthResponse(token, savedAdmin.getId(), savedAdmin.getUsername(), savedAdmin.getEmail());
     }
@@ -63,8 +68,10 @@ public class AdminService {
         String token = jwtService.generateToken(admin);
 
         long expirationTime = jwtService.getJwtExpiration();
-        notificationService.scheduleSessionExpiryNotification(admin.getUsername(), expirationTime - 60000);
+        //notificationService.scheduleSessionExpiryNotification(admin.getUsername(), expirationTime - 60000);
 
+        // For testing, use short expiration
+        notificationService.scheduleSessionExpiryNotification(admin.getUsername(), testingExpirationTime);
         
         return new AuthResponse(token, admin.getId(), admin.getUsername(), admin.getEmail());
     }

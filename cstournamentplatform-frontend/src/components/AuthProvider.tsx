@@ -50,7 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const connectWebSocket = (username: string) =>{
         const client = new Client({
             brokerURL: 'ws://localhost:8080/ws',
-            connectHeaders: {},
+            connectHeaders: {
+                username: username
+            },
             debug: function (str) {
                 console.log(str);
             },
@@ -65,7 +67,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         client.onConnect = () => {
             console.log('WebSocket connected');
-            client.subscribe(`/user/${username}/queue/session-expiry`, () => {
+            client.subscribe('/user/queue/session-expiry', () => {
                 console.log('Session expiry notification received');
                 setSessionExpired(true);
                 client.deactivate();
