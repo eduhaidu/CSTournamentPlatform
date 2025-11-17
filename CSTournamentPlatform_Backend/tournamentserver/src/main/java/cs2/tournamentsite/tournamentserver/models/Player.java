@@ -45,4 +45,7 @@ public class Player {
 
     @Column(name = "role", nullable = false)
     private String role;
+
+    @Column(name = "photo_path")
+    private String photoPath; // Path to player photo
 }

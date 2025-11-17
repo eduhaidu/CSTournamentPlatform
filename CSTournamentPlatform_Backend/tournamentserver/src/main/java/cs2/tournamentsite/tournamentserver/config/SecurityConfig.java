@@ -33,7 +33,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource)) // Enable CORS
             .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless JWT authentication
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/ws/**").permitAll() // Allow access to auth and WebSocket endpoints
+                .requestMatchers("/api/auth/**", "/ws/**", "/uploads/**").permitAll() // Allow access to auth, WebSocket, and uploaded files
                 .anyRequest().authenticated() // All other requests require authentication
             )
             .sessionManagement(session -> session

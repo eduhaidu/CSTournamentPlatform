@@ -1,6 +1,5 @@
 package cs2.tournamentsite.tournamentserver.config;
 
-import java.security.Principal;
 import java.util.Map;
 
 import org.springframework.lang.NonNull;
@@ -24,12 +23,7 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
             String username = accessor.getFirstNativeHeader("username");
             
             if (username != null && sessionAttributes != null) {
-                accessor.setUser(new Principal() {
-                    @Override
-                    public String getName() {
-                        return username;
-                    }
-                });
+                accessor.setUser(() -> username);
             }
         }
         

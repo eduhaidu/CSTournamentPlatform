@@ -7,13 +7,13 @@ package cs2.tournamentsite.tournamentserver.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import cs2.tournamentsite.tournamentserver.models.Player;
+import cs2.tournamentsite.tournamentserver.models.Event;
 
 /**
  *
  * @author eduhaidu
  */
-public interface PlayerRepository extends JpaRepository<Player, Integer>{
-    Player findByNickname(String nickname);
-    Player findByFirstNameAndLastName(String firstName, String lastName);
+public interface EventRepository extends JpaRepository<Event, Integer>{
+    public Event findByName(String name);
+
 }

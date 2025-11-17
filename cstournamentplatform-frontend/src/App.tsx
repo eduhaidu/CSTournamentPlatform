@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Admin from './pages/Admin';
 import Logout from './pages/Logout';
+import EventsList from './pages/EventsList';
+import Liquipedia from './pages/Liquipedia';
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/logout" element={<Logout />} />
+          <Route path="/events" element={<EventsList />} />
+          <Route path="/admin/liquipedia" element={<Liquipedia />} />
         </Routes>
       </Router>
     </AuthProvider>

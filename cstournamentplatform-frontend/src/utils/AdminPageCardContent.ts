@@ -40,6 +40,12 @@ const AdminPageCardContent = [
         description: "Return to the main homepage.",
         link: "/",
         buttonText: "Go to Homepage"
+    },
+    {
+        title: "Liquipedia",
+        description: "Fetch information from Liquipedia.",
+        link: "/admin/liquipedia",
+        buttonText: "Go to Liquipedia"
     }
 ];
 
