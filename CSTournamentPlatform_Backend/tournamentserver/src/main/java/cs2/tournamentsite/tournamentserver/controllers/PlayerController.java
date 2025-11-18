@@ -1,5 +1,7 @@
 package cs2.tournamentsite.tournamentserver.controllers;
 
+import java.util.List;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,5 +41,12 @@ public class PlayerController {
     @DeleteMapping("/{id}")
     public void deletePlayer(@PathVariable Integer id) {
         playerService.deletePlayer(id);
+    }
+
+    @GetMapping("/team/{teamId}")
+    public List<Player> getPlayersByTeamId(@PathVariable Integer teamId) {
+        List<Player> players = playerService.getPlayersByTeamId(teamId);
+        System.out.println("Fetching players for team " + teamId + ": found " + players.size() + " players");
+        return players;
     }
 }

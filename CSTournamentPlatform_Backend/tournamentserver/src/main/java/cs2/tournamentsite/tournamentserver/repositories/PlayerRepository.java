@@ -5,6 +5,8 @@
 
 package cs2.tournamentsite.tournamentserver.repositories;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import cs2.tournamentsite.tournamentserver.models.Player;
@@ -16,4 +18,5 @@ import cs2.tournamentsite.tournamentserver.models.Player;
 public interface PlayerRepository extends JpaRepository<Player, Integer>{
     Player findByNickname(String nickname);
     Player findByFirstNameAndLastName(String firstName, String lastName);
+    List<Player> findByTeamId(Integer teamId);
 }

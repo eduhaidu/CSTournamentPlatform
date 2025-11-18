@@ -17,6 +17,7 @@ export default function TopBar({ user }: TopBarProps) {
                 <li><Link to="/matches">Matches</Link></li>
                 <li><Link to="/events">Events</Link></li>
                 <li><Link to="/players">Players</Link></li>
+                <li><Link to="/teams">Teams</Link></li>
             </ul>
             
             <ul className="topBar-nav-right">

@@ -1,5 +1,6 @@
 package cs2.tournamentsite.tournamentserver.services;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -56,5 +57,8 @@ public class PlayerService {
         }
     }
 
+    public List<Player> getPlayersByTeamId(Integer teamId) {
+        return playerRepository.findByTeamId(teamId);
+    }
 
 }

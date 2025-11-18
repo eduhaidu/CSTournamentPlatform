@@ -1,16 +1,19 @@
 package cs2.tournamentsite.tournamentserver.services;
 
-import cs2.tournamentsite.tournamentserver.dto.liquipedia.TeamData;
-import cs2.tournamentsite.tournamentserver.dto.liquipedia.TournamentData;
-import cs2.tournamentsite.tournamentserver.models.Event;
-import cs2.tournamentsite.tournamentserver.models.Team;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import cs2.tournamentsite.tournamentserver.dto.liquipedia.PlayerData;
+import cs2.tournamentsite.tournamentserver.dto.liquipedia.TeamData;
+import cs2.tournamentsite.tournamentserver.dto.liquipedia.TournamentData;
+import cs2.tournamentsite.tournamentserver.models.Event;
+import cs2.tournamentsite.tournamentserver.models.Player;
+import cs2.tournamentsite.tournamentserver.models.Team;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -18,8 +21,10 @@ import java.util.List;
 public class LiquipediaImportService {
 
     private final LiquipediaService liquipediaService;
+    private final LiquipediaImageService liquipediaImageService;
     private final EventService eventService;
     private final TeamService teamService;
+    private final PlayerService playerService;
 
     /**
      * Import a single tournament from Liquipedia by page title
@@ -52,6 +57,17 @@ public class LiquipediaImportService {
             event.setOrganizer(tournamentData.getOrganizer());
             event.setPrizePool(tournamentData.getPrizePool() != null ? tournamentData.getPrizePool() : 0.0);
             event.setDescription(tournamentData.getDescription());
+
+            // Download and save event banner
+            try {
+                String bannerPath = liquipediaImageService.downloadEventBanner(wikiContent);
+                if (bannerPath != null) {
+                    event.setBannerPath(bannerPath);
+                    log.info("Downloaded event banner: {}", bannerPath);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to download event banner: {}", e.getMessage());
+            }
 
             // Save to database
             Event savedEvent = eventService.saveEvent(event);
@@ -94,9 +110,45 @@ public class LiquipediaImportService {
             team.setFoundedOn(teamData.getFoundedOn());
             team.setCoachName(teamData.getCoachName());
 
+            // Download and save team logo
+            try {
+                String logoPath = liquipediaImageService.downloadTeamLogo(wikiContent);
+                if (logoPath != null) {
+                    team.setLogoPath(logoPath);
+                    log.info("Downloaded team logo: {}", logoPath);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to download team logo: {}", e.getMessage());
+            }
+
             // Save to database
             Team savedTeam = teamService.saveTeam(team);
             log.info("Successfully imported team: {} (ID: {})", savedTeam.getName(), savedTeam.getId());
+            
+            // Import players for this team
+            if (teamData.getPlayers() != null && !teamData.getPlayers().isEmpty()) {
+                int importedPlayers = 0;
+                for (PlayerData playerData : teamData.getPlayers()) {
+                    try {
+                        Player player = new Player();
+                        player.setNickname(playerData.getNickname());
+                        player.setFirstName(playerData.getFirstName() != null ? playerData.getFirstName() : "");
+                        player.setLastName(playerData.getLastName() != null ? playerData.getLastName() : "");
+                        player.setCountry(playerData.getCountry() != null ? playerData.getCountry() : "");
+                        player.setTeamId(savedTeam.getId());
+                        player.setRole(playerData.getRole() != null ? playerData.getRole() : "Player");
+                        player.setJoinedOn(playerData.getJoinDate() != null ? playerData.getJoinDate() : java.time.LocalDate.now());
+                        player.setDateOfBirth(java.time.LocalDate.now().minusYears(20)); // Default age ~20, not available in Liquipedia
+                        
+                        playerService.savePlayer(player);
+                        importedPlayers++;
+                        log.debug("Imported player: {} for team {}", player.getNickname(), savedTeam.getName());
+                    } catch (Exception e) {
+                        log.warn("Failed to import player {}: {}", playerData.getNickname(), e.getMessage());
+                    }
+                }
+                log.info("Imported {} players for team {}", importedPlayers, savedTeam.getName());
+            }
             
             return savedTeam;
             

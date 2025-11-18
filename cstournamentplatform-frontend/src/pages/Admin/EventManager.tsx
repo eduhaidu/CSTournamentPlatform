@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
-import EventCard from "../components/EventCard";
-import axios from "../config/axios";
+import EventCard from "../../components/EventCard";
+import axios from "../../config/axios";
 
-export default function EventsList() {
+import {useState, useEffect} from "react";
+
+export default function EventManager() {
     const [events, setEvents] = useState([]);
 
     useEffect(()=>{
-        // Fetch events from backend API
         const fetchEvents = async () => {
             try{
                 const response = await axios.get('/events/all');
@@ -16,21 +16,19 @@ export default function EventsList() {
             }
         }
         fetchEvents();
-    }, []);
-
-
+    }, [])
     return (
-        <div className="eventsList">
-            <h1>Events List Page</h1>
-            {events.map((event: any) => (
-                <EventCard 
+        <div className="eventManager">
+            <h1>Event Manager</h1>
+            {events.map((event:any)=>(
+                <EventCard
                     key={event.id}
                     id={event.id}
                     title={event.name}
                     date={`${event.startDate} to ${event.endDate}`}
                     location={event.location}
                     bannerPath={event.bannerPath}
-                />
+                    />
             ))}
         </div>
     );

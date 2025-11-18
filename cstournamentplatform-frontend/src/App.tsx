@@ -8,6 +8,7 @@ import Admin from './pages/Admin';
 import Logout from './pages/Logout';
 import EventsList from './pages/EventsList';
 import Liquipedia from './pages/Liquipedia';
+import TeamsList from './pages/TeamsList';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/events" element={<EventsList />} />
+          <Route path="/teams" element={<TeamsList />} />
           <Route path="/admin/liquipedia" element={<Liquipedia />} />
         </Routes>
       </Router>

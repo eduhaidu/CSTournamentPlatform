@@ -1,0 +1,103 @@
+.eventCard {
+  border: 1px solid #00a6ff;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 0;
+  background-color: #1f2548;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.eventCard h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.5em;
+  color: #333;
+}
+
+.eventCard p {
+  margin: 4px 0;
+  color: #666;
+  font-size: 1em;
+}
+
+.samples p {
+    margin: 8px 0;
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.samples a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.samples a:hover {
+    text-decoration: underline;
+}
+
+.samples a:hover {
+    text-decoration: underline;
+}
+
+.samples a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.samples p {
+    margin: 8px 0;
+    color: #7f8c8d;
+    font-size: 14px;
+}
+
+.samples {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.eventActions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.eventPhoto {
+    max-width: 100%;
+    max-height: 300px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.eventActions a button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.eventActions a button:hover {
+    background-color: #2980b9;
+}
+.eventActions a {
+    text-decoration: none;
+}
+@media (max-width: 600px) {
+  .eventCard {
+    padding: 12px;
+  }
+
+  .eventCard h3 {
+    font-size: 1.2em;
+  }
+
+  .eventCard p {
+    font-size: 0.9em;
+  }
+}
+

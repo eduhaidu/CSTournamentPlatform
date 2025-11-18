@@ -1,20 +1,41 @@
-import axios from "axios";
+import axios from "../config/axios";
 import { useEffect, useState } from "react";
 import TeamCard from "../components/TeamCard";
 
+interface Team {
+    id: number;
+    name: string;
+    logoPath?: string;
+    members?: any[];
+}
+
 export default function TeamsList() {
-    const [teams, setTeams] = useState([]);
+    const [teams, setTeams] = useState<Team[]>([]);
 
     useEffect(() => {
-        const fetchTeams = async () => {
+        const fetchTeamsAndMembers = async () => {
             try{
-                const response = await axios.get('http://localhost:8080/teams/all');
-                setTeams(response.data);
+                const response = await axios.get('/teams/all');
+                const teamsData = response.data;
+                
+                // Fetch members for each team
+                const teamsWithMembers = await Promise.all(teamsData.map(async (team: Team) => {
+                    try {
+                        const membersRes = await axios.get(`/players/team/${team.id}`);
+                        console.log(`Team ${team.name} (ID: ${team.id}) members:`, membersRes.data);
+                        return { ...team, members: membersRes.data };
+                    } catch (error) {
+                        console.error(`Error fetching members for team ${team.id}:`, error);
+                        return { ...team, members: [] };
+                    }
+                }));
+                
+                setTeams(teamsWithMembers);
             } catch (error) {
                 console.error("Error fetching teams:", error);
             }
         }
-        fetchTeams();
+        fetchTeamsAndMembers();
     }, []);
     return (
         <div className="teamsList">
@@ -24,7 +45,7 @@ export default function TeamsList() {
                     key={team.id}
                     name={team.name}
                     members={team.members}
-                    photoPath={team.photoPath}
+                    logoPath={team.logoPath}
                 />
             ))}
         </div>
