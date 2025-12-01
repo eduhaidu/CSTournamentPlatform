@@ -1,0 +1,274 @@
+.teamsManager {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.teamsManagerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.teamsManagerHeader h1 {
+    margin: 0;
+    color: #333;
+}
+
+.btnCreate {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btnCreate:hover {
+    background-color: #45a049;
+}
+
+/* Team Form */
+.teamForm {
+    background: #f9f9f9;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.teamForm h2 {
+    margin-top: 0;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.formGroup {
+    margin-bottom: 20px;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+.formGroup input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.formGroup input:focus {
+    outline: none;
+    border-color: #4CAF50;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.currentLogo {
+    margin-top: 10px;
+}
+
+.currentLogo img {
+    max-width: 150px;
+    max-height: 150px;
+    object-fit: contain;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.formActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.btnSubmit {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btnSubmit:hover {
+    background-color: #45a049;
+}
+
+.btnCancel {
+    background-color: #757575;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btnCancel:hover {
+    background-color: #616161;
+}
+
+/* Teams List */
+.teamsList {
+    margin-top: 40px;
+}
+
+.teamsList h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.noTeams {
+    text-align: center;
+    color: #999;
+    padding: 40px;
+    font-size: 18px;
+}
+
+.teamsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.teamItem {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s;
+}
+
+.teamItem:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.teamLogo {
+    width: 100%;
+    height: 150px;
+    object-fit: contain;
+    background: #f5f5f5;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.teamDetails {
+    padding: 20px;
+}
+
+.teamDetails h3 {
+    margin: 0 0 15px 0;
+    color: #333;
+    font-size: 20px;
+}
+
+.teamMeta {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.teamMeta p {
+    margin: 5px 0;
+}
+
+.teamMeta strong {
+    color: #333;
+}
+
+.teamRoster {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.teamRoster h4 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.teamRoster ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.teamRoster li {
+    padding: 5px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.teamActions {
+    display: flex;
+    gap: 10px;
+    padding: 15px 20px;
+    background: #f5f5f5;
+    border-top: 1px solid #ddd;
+}
+
+.btnEdit {
+    flex: 1;
+    background-color: #2196F3;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btnEdit:hover {
+    background-color: #1976D2;
+}
+
+.btnDelete {
+    flex: 1;
+    background-color: #f44336;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btnDelete:hover {
+    background-color: #d32f2f;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .formRow {
+        grid-template-columns: 1fr;
+    }
+
+    .teamsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .teamsManagerHeader {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+}

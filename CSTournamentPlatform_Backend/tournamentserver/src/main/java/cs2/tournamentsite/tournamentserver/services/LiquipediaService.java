@@ -1,5 +1,6 @@
 package cs2.tournamentsite.tournamentserver.services;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -155,7 +156,7 @@ public class LiquipediaService {
                     wikiContent
                 );
                 log.info("Saved wiki content to: {}", debugPath);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 log.warn("Could not save debug file: {}", e.getMessage());
             }
 
@@ -260,7 +261,7 @@ public class LiquipediaService {
             // Remove currency symbols and commas
             String cleaned = prizePoolStr.replaceAll("[^0-9.]", "");
             return Double.valueOf(cleaned);
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             log.warn("Could not parse prize pool: {}", prizePoolStr);
             return 0.0;
         }
@@ -425,4 +426,37 @@ public class LiquipediaService {
         }
         return null;
     }
+
+    /**
+     * Fetches a player's individual page and extracts their photo filename
+     * @param playerNickname The player's nickname/ID
+     * @return The image filename from the player's infobox, or null if not found
+     */
+    public String getPlayerPhotoFilename(String playerNickname) {
+        try {
+            log.info("Fetching player page for: {}", playerNickname);
+            
+            String wikiContent = fetchPageContent(playerNickname);
+            if (wikiContent == null || wikiContent.isEmpty()) {
+                log.warn("No content found for player: {}", playerNickname);
+                return null;
+            }
+            
+            // Extract image from infobox
+            // Pattern: |image=filename
+            String imageFilename = extractInfoboxValue(wikiContent, "image");
+            if (imageFilename != null && !imageFilename.isEmpty()) {
+                log.info("Found photo for {}: {}", playerNickname, imageFilename);
+                return imageFilename;
+            }
+            
+            log.warn("No image found in infobox for player: {}", playerNickname);
+            return null;
+            
+        } catch (Exception e) {
+            log.error("Error fetching player photo for: {}", playerNickname, e);
+            return null;
+        }
+    }
 }
+

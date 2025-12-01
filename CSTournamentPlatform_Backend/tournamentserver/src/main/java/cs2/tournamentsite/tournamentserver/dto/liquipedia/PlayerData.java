@@ -15,5 +15,6 @@ public class PlayerData {
     private String country;       // Flag field in wiki
     private String role;          // e.g., "Rifler", "AWPer", "IGL"
     private LocalDate joinDate;   // When they joined the team
-    private boolean isIGL;        // In-game leader flag
+    private boolean isIGL;     // In-game leader flag
+    private String photoUrl;      // URL to player's photo
 }

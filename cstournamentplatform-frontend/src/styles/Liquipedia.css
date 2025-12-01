@@ -2,18 +2,22 @@
     max-width: 1200px;
     margin: 0 auto;
     padding: 40px 20px;
+    background-color: #f5f7fa;
+    min-height: 100vh;
 }
 
 .liquipediaPage h1 {
     font-size: 2.5rem;
     margin-bottom: 10px;
-    color: #2c3e50;
+    color: #1a202c;
+    font-weight: 700;
 }
 
 .liquipediaPage .description {
-    color: #666;
+    color: #2d3748;
     margin-bottom: 30px;
-    line-height: 1.6;
+    line-height: 1.8;
+    font-size: 16px;
 }
 
 .result {
@@ -57,15 +61,17 @@
 
 .importCard {
     background: white;
-    padding: 25px;
+    padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
 }
 
 .importCard h2 {
     font-size: 1.5rem;
     margin-bottom: 20px;
-    color: #34495e;
+    color: #1a202c;
+    font-weight: 600;
 }
 
 .importCard form {
@@ -75,52 +81,65 @@
 }
 
 .importCard input {
-    padding: 12px;
-    border: 1px solid #ddd;
+    padding: 14px;
+    border: 2px solid #cbd5e0;
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 15px;
+    color: #2d3748;
+    background-color: white;
+}
+
+.importCard input::placeholder {
+    color: #a0aec0;
 }
 
 .importCard input:focus {
     outline: none;
     border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .importCard input:disabled {
-    background-color: #f5f5f5;
+    background-color: #f7fafc;
+    color: #a0aec0;
     cursor: not-allowed;
 }
 
 .importCard button {
-    padding: 12px 24px;
+    padding: 14px 24px;
     background-color: #3498db;
     color: white;
     border: none;
     border-radius: 6px;
     font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.2s;
 }
 
 .importCard button:hover:not(:disabled) {
     background-color: #2980b9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .importCard button:disabled {
-    background-color: #bdc3c7;
+    background-color: #cbd5e0;
+    color: #718096;
     cursor: not-allowed;
 }
 
 .samples {
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid #eee;
+    border-top: 2px solid #e2e8f0;
 }
 
 .samples p {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 10px;
+    font-size: 15px;
+    color: #2d3748;
+    margin-bottom: 12px;
+    font-weight: 600;
 }
 
 .samples ul {
@@ -129,17 +148,22 @@
 }
 
 .samples li {
-    padding: 8px 12px;
-    margin: 5px 0;
-    background-color: #f8f9fa;
-    border-radius: 4px;
+    padding: 10px 14px;
+    margin: 6px 0;
+    background-color: #f7fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 13px;
-    transition: background-color 0.2s;
+    font-size: 14px;
+    color: #2d3748;
+    transition: all 0.2s;
+    font-family: 'Courier New', monospace;
 }
 
 .samples li:hover {
-    background-color: #e9ecef;
+    background-color: #edf2f7;
+    border-color: #cbd5e0;
+    transform: translateX(4px);
 }
 
 .bulkImportSection {
@@ -150,15 +174,17 @@
 
 .bulkCard {
     background: white;
-    padding: 25px;
+    padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 1px 3px rgba(0, 0, 0, 0.06);
+    border: 1px solid #e2e8f0;
 }
 
 .bulkCard h2 {
     font-size: 1.5rem;
     margin-bottom: 20px;
-    color: #34495e;
+    color: #1a202c;
+    font-weight: 600;
 }
 
 .bulkCard form {
@@ -168,41 +194,54 @@
 }
 
 .bulkCard textarea {
-    padding: 12px;
-    border: 1px solid #ddd;
+    padding: 14px;
+    border: 2px solid #cbd5e0;
     border-radius: 6px;
     font-size: 14px;
-    font-family: monospace;
+    font-family: 'Courier New', monospace;
     resize: vertical;
+    color: #2d3748;
+    background-color: white;
+    line-height: 1.6;
+}
+
+.bulkCard textarea::placeholder {
+    color: #a0aec0;
 }
 
 .bulkCard textarea:focus {
     outline: none;
-    border-color: #3498db;
+    border-color: #27ae60;
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
 }
 
 .bulkCard textarea:disabled {
-    background-color: #f5f5f5;
+    background-color: #f7fafc;
+    color: #a0aec0;
     cursor: not-allowed;
 }
 
 .bulkCard button {
-    padding: 12px 24px;
+    padding: 14px 24px;
     background-color: #27ae60;
     color: white;
     border: none;
     border-radius: 6px;
     font-size: 16px;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.2s;
 }
 
 .bulkCard button:hover:not(:disabled) {
     background-color: #229954;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .bulkCard button:disabled {
-    background-color: #bdc3c7;
+    background-color: #cbd5e0;
+    color: #718096;
     cursor: not-allowed;
 }
 

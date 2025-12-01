@@ -49,15 +49,13 @@ public class EventController {
     }
     
     @PostMapping("/add")
-    public Event addEvent(@RequestBody Event entity) {
-        //TODO: process POST request
+    public Event addEvent(@RequestBody Event entity) { 
         
         return eventService.saveEvent(entity);
     }
     
     @PutMapping("update/{id}")
     public Event updateEvent(@PathVariable Integer id, @RequestBody Event entity) {
-        //TODO: process PUT request
         
         return eventService.updateEvent(id, entity);
     }

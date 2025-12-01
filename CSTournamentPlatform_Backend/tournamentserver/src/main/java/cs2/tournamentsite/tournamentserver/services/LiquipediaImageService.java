@@ -204,6 +204,29 @@ public class LiquipediaImageService {
     }
 
     /**
+     * Downloads player photo from Liquipedia given an image filename
+     * @param imageFilename The filename from the player's infobox
+     * @return The path to the saved image (e.g., /uploads/uuid.png), or null if failed
+     */
+    public String downloadPlayerPhoto(String imageFilename) {
+        if (imageFilename == null || imageFilename.isEmpty()) {
+            return null;
+        }
+        
+        String imageUrl = getImageUrl(imageFilename);
+        if (imageUrl != null) {
+            String savedPath = downloadAndSaveImage(imageUrl);
+            if (savedPath != null) {
+                log.info("Downloaded player photo: {}", savedPath);
+                return savedPath;
+            }
+        }
+        
+        log.warn("Failed to download player photo: {}", imageFilename);
+        return null;
+    }
+
+    /**
      * Extracts file extension from URL
      */
     private String getFileExtension(String url) {

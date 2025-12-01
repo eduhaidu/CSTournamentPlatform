@@ -140,6 +140,20 @@ public class LiquipediaImportService {
                         player.setJoinedOn(playerData.getJoinDate() != null ? playerData.getJoinDate() : java.time.LocalDate.now());
                         player.setDateOfBirth(java.time.LocalDate.now().minusYears(20)); // Default age ~20, not available in Liquipedia
                         
+                        // Fetch and download player photo from their individual page
+                        try {
+                            String photoFilename = liquipediaService.getPlayerPhotoFilename(playerData.getNickname());
+                            if (photoFilename != null) {
+                                String photoPath = liquipediaImageService.downloadPlayerPhoto(photoFilename);
+                                player.setPhotoPath(photoPath != null ? photoPath : "");
+                            } else {
+                                player.setPhotoPath("");
+                            }
+                        } catch (Exception e) {
+                            log.warn("Failed to download photo for player {}: {}", playerData.getNickname(), e.getMessage());
+                            player.setPhotoPath("");
+                        }
+                        
                         playerService.savePlayer(player);
                         importedPlayers++;
                         log.debug("Imported player: {} for team {}", player.getNickname(), savedTeam.getName());

@@ -7,6 +7,7 @@ interface Player {
     lastName?: string;
     country?: string;
     role?: string;
+    photoUrl?: string;
 }
 
 export default function TeamCard({ name, members, logoPath }: { name: string; members?: Player[]; logoPath?: string }) {
@@ -32,6 +33,17 @@ export default function TeamCard({ name, members, logoPath }: { name: string; me
             {members && members.length > 0 ? (
                 members.map((member) => (
                     <li key={member.id}>
+                        {member.photoUrl && (
+                            <img 
+                                src={member.photoUrl.startsWith('http') ? member.photoUrl : `http://localhost:8080${member.photoUrl}`} 
+                                alt={`${member.nickname} Photo`} 
+                                className="playerPhoto"
+                                onError={(e) => {
+                                    console.error('Failed to load player image:', member.photoUrl);
+                                    e.currentTarget.style.display = 'none';
+                                }}
+                            />
+                        )}
                         {member.nickname} {member.role && `(${member.role})`}
                         {member.country && ` - ${member.country}`}
                     </li>

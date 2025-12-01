@@ -40,14 +40,13 @@ public class TeamController {
     
     @PostMapping("/add")
     public Team addTeam(@RequestBody Team team) {
-        //TODO: process POST request
+        
         
         return teamService.addTeam(team);
     }
 
     @PutMapping("/update/{id}")
     public Team updateTeam(@PathVariable Integer id, @RequestBody Team updatedTeam) {
-        //TODO: process PUT request
         
         return teamService.updateTeam(id, updatedTeam);
     }

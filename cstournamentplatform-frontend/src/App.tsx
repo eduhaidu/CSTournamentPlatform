@@ -9,6 +9,8 @@ import Logout from './pages/Logout';
 import EventsList from './pages/EventsList';
 import Liquipedia from './pages/Liquipedia';
 import TeamsList from './pages/TeamsList';
+import EventsManager from './pages/Admin/EventsManager';
+import TeamsManager from './pages/Admin/TeamsManager';
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
           <Route path="/events" element={<EventsList />} />
           <Route path="/teams" element={<TeamsList />} />
           <Route path="/admin/liquipedia" element={<Liquipedia />} />
+          <Route path="/admin/events" element={<EventsManager />} />
+          <Route path="/admin/teams" element={<TeamsManager />} />
         </Routes>
       </Router>
     </AuthProvider>
