@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "../../config/axios";
 import "../../styles/EventsManager.css";
+import { formatDateRange } from "../../utils/dateFormatter";
 
 interface Event {
     id: number;
@@ -166,6 +167,9 @@ export default function EventsManager() {
 
     return (
         <div className="eventsManager">
+            <a href="/admin">
+                <button className="backButton">Back to Admin</button>
+            </a>
             <div className="eventsManagerHeader">
                 <h1>Events Manager</h1>
                 {!isCreating && !editingEvent && (
@@ -316,7 +320,7 @@ export default function EventsManager() {
                                     <p className="eventDescription">{event.description}</p>
                                     <div className="eventMeta">
                                         <p><strong>Location:</strong> {event.location}</p>
-                                        <p><strong>Dates:</strong> {event.startDate} to {event.endDate}</p>
+                                        <p><strong>Dates:</strong> {formatDateRange(event.startDate, event.endDate)}</p>
                                         {event.organizer && <p><strong>Organizer:</strong> {event.organizer}</p>}
                                         <p><strong>Prize Pool:</strong> ${event.prizePool.toLocaleString()}</p>
                                     </div>

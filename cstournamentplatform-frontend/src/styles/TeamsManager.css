@@ -13,7 +13,7 @@
 
 .teamsManagerHeader h1 {
     margin: 0;
-    color: #333;
+    color: rgba(255, 255, 255, 0.87);
 }
 
 .btnCreate {
@@ -24,25 +24,27 @@
     border-radius: 6px;
     font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s;
 }
 
 .btnCreate:hover {
     background-color: #45a049;
+    border-color: #45a049;
 }
 
 /* Team Form */
 .teamForm {
-    background: #f9f9f9;
+    background: #1a1a1a;
     padding: 30px;
     border-radius: 8px;
     margin-bottom: 40px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid #333;
 }
 
 .teamForm h2 {
     margin-top: 0;
-    color: #333;
+    color: rgba(255, 255, 255, 0.87);
     margin-bottom: 20px;
 }
 
@@ -54,21 +56,24 @@
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #555;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .formGroup input {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid #444;
     border-radius: 4px;
     font-size: 14px;
     box-sizing: border-box;
+    background-color: #2a2a2a;
+    color: rgba(255, 255, 255, 0.87);
 }
 
 .formGroup input:focus {
     outline: none;
-    border-color: #4CAF50;
+    border-color: #646cff;
+    background-color: #333;
 }
 
 .formRow {
@@ -86,7 +91,7 @@
     max-height: 150px;
     object-fit: contain;
     border-radius: 4px;
-    border: 1px solid #ddd;
+    border: 1px solid #444;
 }
 
 .formActions {
@@ -132,12 +137,12 @@
 
 .teamsList h2 {
     margin-bottom: 20px;
-    color: #333;
+    color: rgba(255, 255, 255, 0.87);
 }
 
 .noTeams {
     text-align: center;
-    color: #999;
+    color: rgba(255, 255, 255, 0.5);
     padding: 40px;
     font-size: 18px;
 }
@@ -149,23 +154,24 @@
 }
 
 .teamItem {
-    background: white;
-    border: 1px solid #ddd;
+    background: #1a1a1a;
+    border: 1px solid #333;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s;
 }
 
 .teamItem:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    border-color: #646cff;
 }
 
 .teamLogo {
     width: 100%;
     height: 150px;
     object-fit: contain;
-    background: #f5f5f5;
+    background: #0d0d0d;
     padding: 20px;
     box-sizing: border-box;
 }
@@ -176,13 +182,13 @@
 
 .teamDetails h3 {
     margin: 0 0 15px 0;
-    color: #333;
+    color: rgba(255, 255, 255, 0.87);
     font-size: 20px;
 }
 
 .teamMeta {
     font-size: 14px;
-    color: #555;
+    color: rgba(255, 255, 255, 0.7);
     margin-bottom: 15px;
 }
 
@@ -191,19 +197,19 @@
 }
 
 .teamMeta strong {
-    color: #333;
+    color: rgba(255, 255, 255, 0.87);
 }
 
 .teamRoster {
     margin-top: 15px;
     padding-top: 15px;
-    border-top: 1px solid #eee;
+    border-top: 1px solid #333;
 }
 
 .teamRoster h4 {
     margin: 0 0 10px 0;
     font-size: 16px;
-    color: #333;
+    color: rgba(255, 255, 255, 0.87);
 }
 
 .teamRoster ul {
@@ -215,30 +221,31 @@
 .teamRoster li {
     padding: 5px 0;
     font-size: 14px;
-    color: #555;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .teamActions {
     display: flex;
     gap: 10px;
     padding: 15px 20px;
-    background: #f5f5f5;
-    border-top: 1px solid #ddd;
+    background: #0d0d0d;
+    border-top: 1px solid #333;
 }
 
 .btnEdit {
     flex: 1;
-    background-color: #2196F3;
+    background-color: #646cff;
     color: white;
     padding: 10px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s;
 }
 
 .btnEdit:hover {
-    background-color: #1976D2;
+    background-color: #535bf2;
+    border-color: #535bf2;
 }
 
 .btnDelete {
@@ -254,6 +261,22 @@
 
 .btnDelete:hover {
     background-color: #d32f2f;
+}
+
+.backButton {
+    background-color: #646cff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.backButton:hover {
+    background-color: #535bf2;
+    border-color: #535bf2;
 }
 
 /* Responsive */

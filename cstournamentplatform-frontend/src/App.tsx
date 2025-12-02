@@ -11,6 +11,8 @@ import Liquipedia from './pages/Liquipedia';
 import TeamsList from './pages/TeamsList';
 import EventsManager from './pages/Admin/EventsManager';
 import TeamsManager from './pages/Admin/TeamsManager';
+import EventPage from './pages/EventPage';
+import EventCalendar from './pages/EventCalendar';
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
           <Route path="/admin" element={<Admin />} />
           <Route path="/logout" element={<Logout />} />
           <Route path="/events" element={<EventsList />} />
+          <Route path="/events/:id" element={<EventPage/>} />
+          <Route path="/events/calendar" element={<EventCalendar />} />
           <Route path="/teams" element={<TeamsList />} />
           <Route path="/admin/liquipedia" element={<Liquipedia />} />
           <Route path="/admin/events" element={<EventsManager />} />

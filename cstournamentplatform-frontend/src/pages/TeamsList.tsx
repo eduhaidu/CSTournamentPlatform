@@ -1,6 +1,8 @@
 import axios from "../config/axios";
 import { useEffect, useState } from "react";
 import TeamCard from "../components/TeamCard";
+import { useAuth } from "../hooks/useAuth";
+import TopBar from "../components/TopBar";
 
 interface Team {
     id: number;
@@ -11,6 +13,7 @@ interface Team {
 
 export default function TeamsList() {
     const [teams, setTeams] = useState<Team[]>([]);
+    const {user} = useAuth();
 
     useEffect(() => {
         const fetchTeamsAndMembers = async () => {
@@ -39,6 +42,7 @@ export default function TeamsList() {
     }, []);
     return (
         <div className="teamsList">
+            <TopBar user={user}/>
             <h1>Teams List Page</h1>
             {teams.map((team: any) => (
                 <TeamCard 

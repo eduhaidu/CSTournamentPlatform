@@ -73,6 +73,39 @@
     color: white;
 }
 
+.eventButton {
+    background: none;
+    border: none;
+    color: #ecf0f1;
+    font-size: 15px;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.eventMenu {
+    position: absolute;
+    background-color: #34495e;
+    border: 1px solid #2980b9;
+    border-radius: 6px;
+    margin-top: 10px;
+    padding: 10px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+}
+.eventMenu li {
+    padding: 8px 20px;
+    white-space: nowrap;
+}
+.eventMenu li:hover {
+    background-color: #2980b9;
+}
+.eventMenu li a {
+    color: white;
+    font-weight: 500;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .topBar {
