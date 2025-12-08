@@ -16,9 +16,11 @@ public class MatchService {
     public Match findMatchById(Integer id) {
         return matchRepository.findById(id).orElse(null);
     }
+
     public Match saveMatch(Match match) {
         return matchRepository.save(match);
     }
+
     public Match updateMatch(Integer id, Match updatedMatch) {
         return matchRepository.findById(id).map(existingMatch -> {
             existingMatch.setTournamentId(updatedMatch.getTournamentId());
@@ -26,10 +28,8 @@ public class MatchService {
             existingMatch.setTeamBId(updatedMatch.getTeamBId());
             existingMatch.setPlayedOn(updatedMatch.getPlayedOn());
             existingMatch.setScheduledTime(updatedMatch.getScheduledTime());
-            existingMatch.setVenue(updatedMatch.getVenue());
             existingMatch.setResult(updatedMatch.getResult());
             existingMatch.setStatus(updatedMatch.getStatus());
-            existingMatch.setRound(updatedMatch.getRound());
             existingMatch.setTeamAScore(updatedMatch.getTeamAScore());
             existingMatch.setTeamBScore(updatedMatch.getTeamBScore());
             existingMatch.setWinnerTeamId(updatedMatch.getWinnerTeamId());

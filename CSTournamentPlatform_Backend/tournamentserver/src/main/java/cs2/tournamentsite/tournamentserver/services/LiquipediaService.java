@@ -29,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class LiquipediaService {
 
     private static final String API_URL = "https://liquipedia.net/counterstrike/api.php";
-    
+
     private final RestTemplate restTemplate;
 
     /**
@@ -48,30 +48,30 @@ public class LiquipediaService {
 
             log.info("Fetching Liquipedia page: {}", pageTitle);
             log.info("API URL: {}", url);
-            
+
             // Try to get raw response as String first to debug
-            String rawResponse = restTemplate.getForObject(url, String.class);
-            log.info("Raw API Response: {}", rawResponse);
-            
+            // String rawResponse = restTemplate.getForObject(url, String.class);
+            // log.info("Raw API Response: {}", rawResponse);
+
             MediaWikiResponse response = restTemplate.getForObject(url, MediaWikiResponse.class);
-            
+
             if (response != null && response.getQuery() != null && response.getQuery().getPages() != null) {
                 List<MediaWikiResponse.Page> pages = response.getQuery().getPages();
                 if (pages.isEmpty()) {
                     log.warn("No pages found for: {}", pageTitle);
                     return null;
                 }
-                
+
                 MediaWikiResponse.Page page = pages.get(0);
-                
+
                 if (page.getRevisions() != null && !page.getRevisions().isEmpty()) {
                     return page.getRevisions().get(0).getContent();
                 }
             }
-            
+
             log.warn("No content found for page: {}", pageTitle);
             return null;
-            
+
         } catch (RestClientException | InvalidUrlException e) {
             log.error("Error fetching Liquipedia page: {}", pageTitle, e);
             return null;
@@ -96,7 +96,7 @@ public class LiquipediaService {
             // Parse dates
             String startDateStr = extractInfoboxValue(wikiContent, "sdate");
             String endDateStr = extractInfoboxValue(wikiContent, "edate");
-            
+
             if (startDateStr != null) {
                 builder.startDate(parseDate(startDateStr));
             }
@@ -123,7 +123,7 @@ public class LiquipediaService {
             builder.description(description);
 
             return builder.build();
-            
+
         } catch (Exception e) {
             log.error("Error parsing tournament data", e);
             return null;
@@ -142,19 +142,23 @@ public class LiquipediaService {
             TeamData.TeamDataBuilder builder = TeamData.builder();
 
             // Parse team name
-            String name = extractInfoboxValue(wikiContent, "team");
-            if (name == null) {
-                name = extractInfoboxValue(wikiContent, "name");
-            }
+            // String name = extractInfoboxValue(wikiContent, "team");
+            // if (name == null) {
+            // name = extractInfoboxValue(wikiContent, "name");
+            // }
+            // builder.name(name != null ? name : "Unknown Team");
+
+            String infoboxSection = extractInfoboxSection(wikiContent, "team");
+            String name = extractInfoboxValue(infoboxSection, "name");
             builder.name(name != null ? name : "Unknown Team");
 
             // Debug: save wiki content to file
             try {
-                String debugPath = "/tmp/liquipedia_" + (name != null ? name.replaceAll("[^a-zA-Z0-9]", "_") : "unknown") + ".txt";
+                String debugPath = "/tmp/liquipedia_"
+                        + (name != null ? name.replaceAll("[^a-zA-Z0-9]", "_") : "unknown") + ".txt";
                 java.nio.file.Files.writeString(
-                    java.nio.file.Paths.get(debugPath),
-                    wikiContent
-                );
+                        java.nio.file.Paths.get(debugPath),
+                        wikiContent);
                 log.info("Saved wiki content to: {}", debugPath);
             } catch (IOException e) {
                 log.warn("Could not save debug file: {}", e.getMessage());
@@ -179,7 +183,7 @@ public class LiquipediaService {
             builder.players(players);
 
             return builder.build();
-            
+
         } catch (Exception e) {
             log.error("Error parsing team data", e);
             return null;
@@ -192,16 +196,15 @@ public class LiquipediaService {
     public List<String> searchTournaments(String category) {
         try {
             log.info("Searching tournaments in category: {}", category);
-            
+
             // This would return a list of page titles
             // For simplicity, returning a hardcoded list of major tournaments
             return Arrays.asList(
-                "Intel_Extreme_Masters",
-                "BLAST_Premier",
-                "ESL_Pro_League",
-                "PGL_Major"
-            );
-            
+                    "Intel_Extreme_Masters",
+                    "BLAST_Premier",
+                    "ESL_Pro_League",
+                    "PGL_Major");
+
         } catch (Exception e) {
             log.error("Error searching tournaments", e);
             return Collections.emptyList();
@@ -273,7 +276,7 @@ public class LiquipediaService {
      */
     private List<PlayerData> parseActivePlayers(String wikiContent) {
         List<PlayerData> players = new java.util.ArrayList<>();
-        
+
         if (wikiContent == null || wikiContent.isEmpty()) {
             return players;
         }
@@ -282,21 +285,20 @@ public class LiquipediaService {
             // Find the Active roster section
             // Pattern: {{Person|flag=xx|id=nickname|name=Full Name|joindate=...}}
             Pattern personPattern = Pattern.compile(
-                "\\{\\{Person\\|([^}]+)\\}\\}",
-                Pattern.CASE_INSENSITIVE
-            );
-            
+                    "\\{\\{Person\\|([^}]+)\\}\\}",
+                    Pattern.CASE_INSENSITIVE);
+
             // Try multiple section naming patterns
             int activeStart = -1;
             int activeEnd = -1;
-            
+
             // Try "===Active===" first
             activeStart = wikiContent.indexOf("===Active===");
             if (activeStart != -1) {
                 log.debug("Found ===Active=== section at position {}", activeStart);
                 activeEnd = wikiContent.indexOf("===", activeStart + 13);
             }
-            
+
             // Try "==Player Roster==" if not found
             if (activeStart == -1) {
                 activeStart = wikiContent.indexOf("==Player Roster==");
@@ -306,7 +308,7 @@ public class LiquipediaService {
                     activeEnd = wikiContent.indexOf("\n==", activeStart + 17);
                 }
             }
-            
+
             // Try just looking for {{Squad|status=active pattern
             if (activeStart == -1) {
                 activeStart = wikiContent.indexOf("{{Squad|status=active");
@@ -321,16 +323,16 @@ public class LiquipediaService {
                     }
                 }
             }
-            
+
             if (activeStart != -1) {
                 String activeSection = activeEnd != -1 && activeEnd > activeStart
-                    ? wikiContent.substring(activeStart, activeEnd)
-                    : wikiContent.substring(activeStart, Math.min(activeStart + 5000, wikiContent.length()));
-                
+                        ? wikiContent.substring(activeStart, activeEnd)
+                        : wikiContent.substring(activeStart, Math.min(activeStart + 5000, wikiContent.length()));
+
                 log.debug("Searching for players in section of length: {}", activeSection.length());
-                
+
                 Matcher matcher = personPattern.matcher(activeSection);
-                
+
                 while (matcher.find()) {
                     String personData = matcher.group(1);
                     log.debug("Found Person template: {}", personData.substring(0, Math.min(100, personData.length())));
@@ -343,31 +345,32 @@ public class LiquipediaService {
             } else {
                 log.warn("Could not find Active roster section in wiki content");
             }
-            
+
             log.info("Parsed {} active players from roster", players.size());
-            
+
         } catch (Exception e) {
             log.error("Error parsing players from roster", e);
         }
-        
+
         return players;
     }
 
     /**
      * Parses individual player data from Person template parameters
-     * Format: flag=xx|id=nickname|name=Full Name|joindate=2024-01-01|role=Rifler|igl=y
+     * Format: flag=xx|id=nickname|name=Full
+     * Name|joindate=2024-01-01|role=Rifler|igl=y
      */
     private PlayerData parsePersonData(String personData) {
         try {
             PlayerData.PlayerDataBuilder builder = PlayerData.builder();
-            
+
             // Parse nickname (id field)
             String nickname = extractTemplateParam(personData, "id");
             if (nickname == null || nickname.isEmpty()) {
                 return null; // Nickname is required
             }
             builder.nickname(nickname);
-            
+
             // Parse full name
             String fullName = extractTemplateParam(personData, "name");
             if (fullName != null && !fullName.isEmpty()) {
@@ -380,31 +383,31 @@ public class LiquipediaService {
                 builder.lastName("");
                 builder.realName("");
             }
-            
+
             // Parse country (flag field)
             String country = extractTemplateParam(personData, "flag");
             builder.country(country != null ? country.toUpperCase() : "");
-            
+
             // Parse role
             String role = extractTemplateParam(personData, "role");
             builder.role(role != null ? role : "Player");
-            
+
             // Check if IGL
             String iglStr = extractTemplateParam(personData, "igl");
             builder.isIGL("y".equalsIgnoreCase(iglStr) || "yes".equalsIgnoreCase(iglStr));
             if (builder.build().isIGL() && (role == null || role.isEmpty())) {
                 builder.role("IGL");
             }
-            
+
             // Parse join date
             String joinDateStr = extractTemplateParam(personData, "joindate");
             if (joinDateStr != null && !joinDateStr.isEmpty()) {
                 LocalDate joinDate = parseLocalDate(joinDateStr);
                 builder.joinDate(joinDate);
             }
-            
+
             return builder.build();
-            
+
         } catch (Exception e) {
             log.warn("Error parsing person data: {}", personData, e);
             return null;
@@ -429,19 +432,20 @@ public class LiquipediaService {
 
     /**
      * Fetches a player's individual page and extracts their photo filename
+     * 
      * @param playerNickname The player's nickname/ID
      * @return The image filename from the player's infobox, or null if not found
      */
     public String getPlayerPhotoFilename(String playerNickname) {
         try {
             log.info("Fetching player page for: {}", playerNickname);
-            
+
             String wikiContent = fetchPageContent(playerNickname);
             if (wikiContent == null || wikiContent.isEmpty()) {
                 log.warn("No content found for player: {}", playerNickname);
                 return null;
             }
-            
+
             // Extract image from infobox
             // Pattern: |image=filename
             String imageFilename = extractInfoboxValue(wikiContent, "image");
@@ -449,14 +453,45 @@ public class LiquipediaService {
                 log.info("Found photo for {}: {}", playerNickname, imageFilename);
                 return imageFilename;
             }
-            
+
             log.warn("No image found in infobox for player: {}", playerNickname);
             return null;
-            
+
         } catch (Exception e) {
             log.error("Error fetching player photo for: {}", playerNickname, e);
             return null;
         }
     }
-}
 
+    public String extractInfoboxSection(String content, String infoboxType) {
+        String infoboxSection = "";
+        int sectionStart = content.indexOf("{{Infobox " + infoboxType);
+        int sectionEnd = -1;
+        int openBracketCount = 0;
+        int closedBracketCount = 0;
+        if (sectionStart == -1) {
+            log.warn("Infobox " + infoboxType + " not found");
+            return null;
+        }
+        openBracketCount++;
+        log.info("Found infobox: " + infoboxType + " at position: " + sectionStart);
+        int maxIterations = 10000;
+        int iterations = 0;
+        int currentIndex = sectionStart + 2;
+        while (closedBracketCount < openBracketCount && iterations++ < maxIterations) {
+            if (content.substring(currentIndex, currentIndex + 2).equals("{{")) {
+                openBracketCount++;
+            }
+            if (content.substring(currentIndex, currentIndex + 2).equals("}}")) {
+                closedBracketCount++;
+            }
+            currentIndex++;
+        }
+        if (iterations >= maxIterations) {
+            log.error("Hit max iterations - possible infinite loop!");
+        }
+        sectionEnd = currentIndex;
+        infoboxSection = content.substring(sectionStart, sectionEnd);
+        return infoboxSection;
+    }
+}

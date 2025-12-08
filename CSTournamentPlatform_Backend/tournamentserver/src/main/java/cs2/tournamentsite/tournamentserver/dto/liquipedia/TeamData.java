@@ -18,4 +18,5 @@ public class TeamData {
     private LocalDate foundedOn;
     private String coachName;
     private List<PlayerData> players;
+    private String pageTitle;
 }

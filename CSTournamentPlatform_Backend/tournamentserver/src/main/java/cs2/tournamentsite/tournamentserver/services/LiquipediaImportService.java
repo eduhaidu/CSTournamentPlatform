@@ -1,5 +1,7 @@
 package cs2.tournamentsite.tournamentserver.services;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +14,7 @@ import cs2.tournamentsite.tournamentserver.dto.liquipedia.TournamentData;
 import cs2.tournamentsite.tournamentserver.models.Event;
 import cs2.tournamentsite.tournamentserver.models.Player;
 import cs2.tournamentsite.tournamentserver.models.Team;
+import io.jsonwebtoken.io.IOException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,7 +36,7 @@ public class LiquipediaImportService {
     public Event importTournament(String pageTitle) {
         try {
             log.info("Importing tournament: {}", pageTitle);
-            
+
             // Fetch page content
             String wikiContent = liquipediaService.fetchPageContent(pageTitle);
             if (wikiContent == null) {
@@ -72,9 +75,9 @@ public class LiquipediaImportService {
             // Save to database
             Event savedEvent = eventService.saveEvent(event);
             log.info("Successfully imported tournament: {} (ID: {})", savedEvent.getName(), savedEvent.getId());
-            
+
             return savedEvent;
-            
+
         } catch (Exception e) {
             log.error("Error importing tournament: {}", pageTitle, e);
             return null;
@@ -88,7 +91,7 @@ public class LiquipediaImportService {
     public Team importTeam(String pageTitle) {
         try {
             log.info("Importing team: {}", pageTitle);
-            
+
             // Fetch page content
             String wikiContent = liquipediaService.fetchPageContent(pageTitle);
             if (wikiContent == null) {
@@ -109,6 +112,7 @@ public class LiquipediaImportService {
             team.setCountry(teamData.getCountry());
             team.setFoundedOn(teamData.getFoundedOn());
             team.setCoachName(teamData.getCoachName());
+            team.setPageTitle(pageTitle);
 
             // Download and save team logo
             try {
@@ -124,7 +128,7 @@ public class LiquipediaImportService {
             // Save to database
             Team savedTeam = teamService.saveTeam(team);
             log.info("Successfully imported team: {} (ID: {})", savedTeam.getName(), savedTeam.getId());
-            
+
             // Import players for this team
             if (teamData.getPlayers() != null && !teamData.getPlayers().isEmpty()) {
                 int importedPlayers = 0;
@@ -137,9 +141,11 @@ public class LiquipediaImportService {
                         player.setCountry(playerData.getCountry() != null ? playerData.getCountry() : "");
                         player.setTeamId(savedTeam.getId());
                         player.setRole(playerData.getRole() != null ? playerData.getRole() : "Player");
-                        player.setJoinedOn(playerData.getJoinDate() != null ? playerData.getJoinDate() : java.time.LocalDate.now());
-                        player.setDateOfBirth(java.time.LocalDate.now().minusYears(20)); // Default age ~20, not available in Liquipedia
-                        
+                        player.setJoinedOn(playerData.getJoinDate() != null ? playerData.getJoinDate()
+                                : java.time.LocalDate.now());
+                        player.setDateOfBirth(java.time.LocalDate.now().minusYears(20)); // Default age ~20, not
+                                                                                         // available in Liquipedia
+
                         // Fetch and download player photo from their individual page
                         try {
                             String photoFilename = liquipediaService.getPlayerPhotoFilename(playerData.getNickname());
@@ -150,10 +156,11 @@ public class LiquipediaImportService {
                                 player.setPhotoPath("");
                             }
                         } catch (Exception e) {
-                            log.warn("Failed to download photo for player {}: {}", playerData.getNickname(), e.getMessage());
+                            log.warn("Failed to download photo for player {}: {}", playerData.getNickname(),
+                                    e.getMessage());
                             player.setPhotoPath("");
                         }
-                        
+
                         playerService.savePlayer(player);
                         importedPlayers++;
                         log.debug("Imported player: {} for team {}", player.getNickname(), savedTeam.getName());
@@ -163,9 +170,9 @@ public class LiquipediaImportService {
                 }
                 log.info("Imported {} players for team {}", importedPlayers, savedTeam.getName());
             }
-            
+
             return savedTeam;
-            
+
         } catch (Exception e) {
             log.error("Error importing team: {}", pageTitle, e);
             return null;
@@ -178,13 +185,13 @@ public class LiquipediaImportService {
     @Transactional
     public List<Event> importTournaments(List<String> pageTitles) {
         List<Event> importedEvents = new ArrayList<>();
-        
+
         for (String pageTitle : pageTitles) {
             Event event = importTournament(pageTitle);
             if (event != null) {
                 importedEvents.add(event);
             }
-            
+
             // Be respectful with API calls - add delay
             try {
                 Thread.sleep(1000); // 1 second delay between requests
@@ -194,7 +201,7 @@ public class LiquipediaImportService {
                 break;
             }
         }
-        
+
         log.info("Import completed: {} tournaments imported", importedEvents.size());
         return importedEvents;
     }
@@ -205,13 +212,13 @@ public class LiquipediaImportService {
     @Transactional
     public List<Team> importTeams(List<String> pageTitles) {
         List<Team> importedTeams = new ArrayList<>();
-        
+
         for (String pageTitle : pageTitles) {
             Team team = importTeam(pageTitle);
             if (team != null) {
                 importedTeams.add(team);
             }
-            
+
             // Be respectful with API calls - add delay
             try {
                 Thread.sleep(1000); // 1 second delay between requests
@@ -221,8 +228,23 @@ public class LiquipediaImportService {
                 break;
             }
         }
-        
+
         log.info("Import completed: {} teams imported", importedTeams.size());
         return importedTeams;
+    }
+
+    @Transactional
+    public String testFetchPage(String pageTitle) throws java.io.IOException {
+        String wikiContent = liquipediaService.fetchPageContent(pageTitle);
+        if (wikiContent != null) {
+            log.info(wikiContent);
+            try (BufferedWriter logWriter = new BufferedWriter(new FileWriter("logs/wikiLog.txt", true))) {
+                logWriter.write(wikiContent);
+                return "Succesfully fetched content for page: " + pageTitle;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "Failed to fetch content for page: " + pageTitle;
     }
 }

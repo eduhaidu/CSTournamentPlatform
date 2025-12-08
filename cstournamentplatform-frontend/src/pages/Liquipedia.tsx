@@ -19,6 +19,7 @@ export default function Liquipedia() {
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<ImportResult | null>(null);
     const [samples, setSamples] = useState<{ tournaments: string[], teams: string[] }>({ tournaments: [], teams: [] });
+    const [testFetchPage, setTestFetchPage] = useState('');
 
     const fetchSamples = async () => {
         try {
@@ -122,6 +123,26 @@ export default function Liquipedia() {
             setLoading(false);
         }
     };
+
+    const handleTestFetch = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!testFetchPage.trim()) return;
+        
+        setLoading(true);
+        setResult(null);
+
+        try{
+            const response = await axios.post(
+                `api/admin/liquipedia/test-import?pageTitle=${encodeURIComponent(testFetchPage)}`
+            );
+            setResult(response.data);
+            setTestFetchPage('');    
+        } catch(error:any){
+            setResult({ message: 'Error', error: error.response?.data?.error || error.message });
+        } finally {
+            setLoading(false);
+        }
+    }
 
     return (
         <div className="liquipediaPage">
@@ -230,6 +251,21 @@ export default function Liquipedia() {
                         />
                         <button type="submit" disabled={loading || !bulkTeams.trim()}>
                             {loading ? 'Importing...' : 'Bulk Import Teams'}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div className='testSection'>
+                <div className='testCard'>
+                    <h2>Test fetch page content</h2>
+                    <form onSubmit={handleTestFetch}>
+                        <textarea value={testFetchPage}
+                        onChange={(e)=>setTestFetchPage(e.target.value)}
+                        placeholder='Enter the page you want to test'
+                        disabled={loading}
+                        />
+                        <button type="submit" disabled={loading || !testFetchPage.trim()}>
+                            {loading ? 'Fetching...' : 'Fetch'}
                         </button>
                     </form>
                 </div>

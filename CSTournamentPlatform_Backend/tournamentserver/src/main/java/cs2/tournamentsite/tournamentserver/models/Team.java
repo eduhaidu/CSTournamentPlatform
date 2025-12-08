@@ -21,8 +21,10 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private String name;
+    private String alias;
     private String country;
     private LocalDate foundedOn;
     private String coachName;
     private String logoPath; // Path to team logo image
+    private String pageTitle;
 }

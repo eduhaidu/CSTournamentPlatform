@@ -26,10 +26,8 @@ public class Match {
     private Integer teamBId;
     private Time scheduledTime;
     private Date playedOn;
-    private String venue;
     private String result;
     private String status;
-    private Integer round;
     private Integer teamAScore;
     private Integer teamBScore;
     private Integer winnerTeamId;

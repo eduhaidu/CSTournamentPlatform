@@ -178,4 +178,23 @@ public class LiquipediaImportController {
             "pageTitles", samples
         ));
     }
+
+    @PostMapping("/test-import")
+    public ResponseEntity<?> testFetchPage(@RequestParam String pageTitle){
+        try {
+            log.info("Admin requested to test the page: {}", pageTitle);
+            String message = liquipediaImportService.testFetchPage(pageTitle);
+            if (message == null){
+                return ResponseEntity.badRequest().body(
+                    Map.of("error","Failed to fetch content for page: "+pageTitle)
+                );
+            }
+            return ResponseEntity.ok(Map.of("message", "Message from fetching page"));
+        } catch (Exception e) {
+            log.error("Endpoint error",e);
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+    
+    
 }
