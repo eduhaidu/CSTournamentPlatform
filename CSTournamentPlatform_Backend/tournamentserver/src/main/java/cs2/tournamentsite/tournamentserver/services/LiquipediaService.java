@@ -16,6 +16,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.InvalidUrlException;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import cs2.tournamentsite.tournamentserver.dto.liquipedia.MapData;
+import cs2.tournamentsite.tournamentserver.dto.liquipedia.MatchData;
 import cs2.tournamentsite.tournamentserver.dto.liquipedia.MediaWikiResponse;
 import cs2.tournamentsite.tournamentserver.dto.liquipedia.PlayerData;
 import cs2.tournamentsite.tournamentserver.dto.liquipedia.TeamData;
@@ -81,13 +83,14 @@ public class LiquipediaService {
     /**
      * Parses tournament data from MediaWiki content
      */
-    public TournamentData parseTournamentData(String wikiContent) {
+    public TournamentData parseTournamentData(String wikiContent, String pageTitle) {
         if (wikiContent == null || wikiContent.isEmpty()) {
             return null;
         }
 
         try {
             TournamentData.TournamentDataBuilder builder = TournamentData.builder();
+            List<MatchData> matches = new java.util.ArrayList<>();
 
             // Parse name from infobox
             String name = extractInfoboxValue(wikiContent, "name");
@@ -122,6 +125,59 @@ public class LiquipediaService {
             String description = extractDescription(wikiContent);
             builder.description(description);
 
+            // Parse matches
+
+            int resultsStart = -1;
+            int resultsEnd = -1;
+            String resultsSection = "";
+
+            // Try "===Results===" first
+            resultsStart = wikiContent.indexOf("===Playoffs===");
+            if (resultsStart != -1) {
+                log.info("Found ===Playoffs=== section at position {}", resultsStart);
+                resultsEnd = wikiContent.indexOf("===", resultsStart + 13);
+                resultsSection = resultsEnd != -1 && resultsEnd > resultsStart
+                        ? wikiContent.substring(resultsStart, resultsEnd)
+                        : wikiContent.substring(resultsStart, Math.min(resultsStart + 5000, wikiContent.length()));
+            }
+            // Fetch from the /Playoffs page if not found
+            if (resultsStart == -1) {
+                String playoffsContent = fetchPageContent(pageTitle + "/Playoffs");
+                if (playoffsContent != null && !playoffsContent.isEmpty()) {
+                    resultsStart = playoffsContent.indexOf("===Results===");
+                    if (resultsStart != -1) {
+                        log.info("Found ===Results=== section in /Playoffs at position {}", resultsStart);
+                        resultsEnd = playoffsContent.indexOf("===", resultsStart + 13);
+                        resultsSection = resultsEnd != -1 && resultsEnd > resultsStart
+                                ? playoffsContent.substring(resultsStart, resultsEnd)
+                                : playoffsContent.substring(resultsStart,
+                                        Math.min(resultsStart + 5000, playoffsContent.length()));
+                    }
+                }
+            }
+            if (resultsStart != -1) {
+                String bracketContent = extractTemplateSection(resultsSection, "Bracket");
+                if (bracketContent != null) {
+                    Pattern roundMatchPattern = Pattern.compile("\\|R(\\d+)M(\\d+)=");
+                    Matcher matcher = roundMatchPattern.matcher(bracketContent);
+                    while (matcher.find()) {
+                        int matchStart = matcher.start();
+                        String substringFromMatch = bracketContent.substring(matchStart + 4);
+                        String matchTemplate = extractTemplateSection(substringFromMatch, "Match");
+                        MatchData match = parseMatchData(matchTemplate);
+                        if (match != null) {
+                            match.setRoundId(Integer.parseInt(matcher.group(1)));
+                            match.setMatchId(Integer.parseInt(matcher.group(2)));
+                            matches.add(match);
+                            log.info("Parsed match: {} vs {} (Round {}, Match {})", match.getTeamA(), match.getTeamB(),
+                                    match.getRoundId(), match.getMatchId());
+                        }
+                    }
+                }
+            } else {
+                log.warn("No Results section found for tournament: {}", pageTitle);
+            }
+            builder.matches(matches);
             return builder.build();
 
         } catch (Exception e) {
@@ -148,8 +204,8 @@ public class LiquipediaService {
             // }
             // builder.name(name != null ? name : "Unknown Team");
 
-            String infoboxSection = extractInfoboxSection(wikiContent, "team");
-            String name = extractInfoboxValue(infoboxSection, "name");
+            String section = extractTemplateSection(wikiContent, "Infobox team");
+            String name = extractInfoboxValue(section, "name");
             builder.name(name != null ? name : "Unknown Team");
 
             // Debug: save wiki content to file
@@ -463,18 +519,18 @@ public class LiquipediaService {
         }
     }
 
-    public String extractInfoboxSection(String content, String infoboxType) {
-        String infoboxSection = "";
-        int sectionStart = content.indexOf("{{Infobox " + infoboxType);
+    public String extractTemplateSection(String content, String prefix) {
+        String section = "";
+        int sectionStart = content.indexOf("{{" + prefix);
         int sectionEnd = -1;
         int openBracketCount = 0;
         int closedBracketCount = 0;
         if (sectionStart == -1) {
-            log.warn("Infobox " + infoboxType + " not found");
+            log.warn(prefix + " not found");
             return null;
         }
         openBracketCount++;
-        log.info("Found infobox: " + infoboxType + " at position: " + sectionStart);
+        log.info("Found " + prefix + " at position: " + sectionStart);
         int maxIterations = 10000;
         int iterations = 0;
         int currentIndex = sectionStart + 2;
@@ -491,7 +547,86 @@ public class LiquipediaService {
             log.error("Hit max iterations - possible infinite loop!");
         }
         sectionEnd = currentIndex;
-        infoboxSection = content.substring(sectionStart, sectionEnd);
-        return infoboxSection;
+        section = content.substring(sectionStart, sectionEnd);
+        return section;
     }
+
+    public MatchData parseMatchData(String matchTemplate) {
+        try {
+            List<MapData> maps = new java.util.ArrayList<>();
+            MatchData.MatchDataBuilder builder = MatchData.builder();
+            int teamAScore = 0;
+            int teamBScore = 0;
+            String teamASection = extractTemplateParam(matchTemplate, "opponent1");
+            String teamBSection = extractTemplateParam(matchTemplate, "opponent2");
+            String teamA = null;
+            String teamB = null;
+            if (teamASection != null) {
+                String TeamOpponentTemplate = extractTemplateSection(teamASection, "TeamOpponent");
+                if (TeamOpponentTemplate != null) {
+                    Pattern namePattern = Pattern.compile("TeamOpponent\\|(\\w+)");
+                    Matcher nameMatcher = namePattern.matcher(TeamOpponentTemplate);
+                    if (nameMatcher.find()) {
+                        teamA = nameMatcher.group(1).trim();
+                    }
+                }
+            }
+            if (teamBSection != null) {
+                String TeamOpponentTemplate = extractTemplateSection(teamBSection, "TeamOpponent");
+                if (TeamOpponentTemplate != null) {
+                    Pattern namePattern = Pattern.compile("TeamOpponent\\|(\\w+)");
+                    Matcher nameMatcher = namePattern.matcher(TeamOpponentTemplate);
+                    if (nameMatcher.find()) {
+                        teamB = nameMatcher.group(1).trim();
+                    }
+                }
+            }
+            // Parse maps
+
+            String winner = teamAScore > teamBScore ? teamA : teamB;
+            builder.teamA(teamA != null ? teamA : "Team A");
+            builder.teamB(teamB != null ? teamB : "Team B");
+            builder.scoreA(teamAScore);
+            builder.scoreB(teamBScore);
+            builder.winner(winner);
+            return builder.build();
+
+        } catch (Exception e) {
+            log.error("Error parsing match data: {}", matchTemplate, e);
+        }
+        return null;
+    }
+
+    private MapData parseMapData(String mapTemplate) {
+        try {
+            MapData.MapDataBuilder builder = MapData.builder();
+            String mapName = extractTemplateParam(mapTemplate, "map");
+            String teamATSideScoreStr = extractTemplateParam(mapTemplate, "t1t");
+            String teamBTSideScoreStr = extractTemplateParam(mapTemplate, "t2t");
+            String teamACTSideScoreStr = extractTemplateParam(mapTemplate, "t1ct");
+            String teamBCTSideScoreStr = extractTemplateParam(mapTemplate, "t2ct");
+            int teamATSideScore = teamATSideScoreStr != null ? Integer.parseInt(teamATSideScoreStr) : 0;
+            int teamBTSideScore = teamBTSideScoreStr != null ? Integer.parseInt(teamBTSideScoreStr) : 0;
+            int teamACTSideScore = teamACTSideScoreStr != null ? Integer.parseInt(teamACTSideScoreStr) : 0;
+            int teamBCTSideScore = teamBCTSideScoreStr != null ? Integer.parseInt(teamBCTSideScoreStr) : 0;
+            int teamAFinalScore = teamATSideScore + teamACTSideScore;
+            int teamBFinalScore = teamBTSideScore + teamBCTSideScore;
+
+            builder.mapName(mapName != null ? mapName : "Unknown Map");
+            builder.teamATSideScore(teamATSideScore);
+            builder.teamBTSideScore(teamBTSideScore);
+            builder.teamACTSideScore(teamACTSideScore);
+            builder.teamBCTSideScore(teamBCTSideScore);
+            builder.teamAFinalScore(teamAFinalScore);
+            builder.teamBFinalScore(teamBFinalScore);
+            String winner = teamAFinalScore > teamBFinalScore ? "A" : "B";
+            builder.winner(winner);
+            return builder.build();
+
+        } catch (Exception e) {
+            log.error("Error parsing map data: {}", mapTemplate, e);
+            return null;
+        }
+    }
+
 }

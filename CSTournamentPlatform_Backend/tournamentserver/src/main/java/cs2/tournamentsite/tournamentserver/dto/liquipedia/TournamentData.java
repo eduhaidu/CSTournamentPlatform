@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -19,4 +20,5 @@ public class TournamentData {
     private String organizer;
     private Double prizePool;
     private String description;
+    private List<MatchData> matches;
 }

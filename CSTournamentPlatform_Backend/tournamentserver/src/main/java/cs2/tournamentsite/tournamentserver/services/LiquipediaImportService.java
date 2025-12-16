@@ -45,7 +45,7 @@ public class LiquipediaImportService {
             }
 
             // Parse tournament data
-            TournamentData tournamentData = liquipediaService.parseTournamentData(wikiContent);
+            TournamentData tournamentData = liquipediaService.parseTournamentData(wikiContent, pageTitle);
             if (tournamentData == null) {
                 log.error("Failed to parse tournament data for: {}", pageTitle);
                 return null;
@@ -238,11 +238,15 @@ public class LiquipediaImportService {
         String wikiContent = liquipediaService.fetchPageContent(pageTitle);
         if (wikiContent != null) {
             log.info(wikiContent);
-            try (BufferedWriter logWriter = new BufferedWriter(new FileWriter("logs/wikiLog.txt", true))) {
-                logWriter.write(wikiContent);
-                return "Succesfully fetched content for page: " + pageTitle;
+            try {
+                String debugPath = "/tmp/liquipedia_"
+                        + (pageTitle != null ? pageTitle.replaceAll("[^a-zA-Z0-9]", "_") : "unknown") + ".txt";
+                java.nio.file.Files.writeString(
+                        java.nio.file.Paths.get(debugPath),
+                        wikiContent);
+                log.info("Saved wiki content to: {}", debugPath);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.warn("Could not save debug file: {}", e.getMessage());
             }
         }
         return "Failed to fetch content for page: " + pageTitle;
