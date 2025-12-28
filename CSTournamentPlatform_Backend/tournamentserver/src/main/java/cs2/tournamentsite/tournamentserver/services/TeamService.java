@@ -50,4 +50,8 @@ public class TeamService {
             teamRepository.deleteById(id);
         }
     }
+
+    public List<Team> searchTeamsByPageTitle(String pageTitle) {
+        return teamRepository.findByPageTitleContainingIgnoreCase(pageTitle);
+    }
 }

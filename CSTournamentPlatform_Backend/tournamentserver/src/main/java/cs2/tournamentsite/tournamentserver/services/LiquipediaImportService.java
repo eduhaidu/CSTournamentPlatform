@@ -1,17 +1,19 @@
 package cs2.tournamentsite.tournamentserver.services;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import cs2.tournamentsite.tournamentserver.dto.liquipedia.MapData;
+import cs2.tournamentsite.tournamentserver.dto.liquipedia.MatchData;
 import cs2.tournamentsite.tournamentserver.dto.liquipedia.PlayerData;
 import cs2.tournamentsite.tournamentserver.dto.liquipedia.TeamData;
 import cs2.tournamentsite.tournamentserver.dto.liquipedia.TournamentData;
 import cs2.tournamentsite.tournamentserver.models.Event;
+import cs2.tournamentsite.tournamentserver.models.Map;
+import cs2.tournamentsite.tournamentserver.models.Match;
 import cs2.tournamentsite.tournamentserver.models.Player;
 import cs2.tournamentsite.tournamentserver.models.Team;
 import io.jsonwebtoken.io.IOException;
@@ -28,6 +30,8 @@ public class LiquipediaImportService {
     private final EventService eventService;
     private final TeamService teamService;
     private final PlayerService playerService;
+    private final MatchService matchService;
+    private final MapService mapService;
 
     /**
      * Import a single tournament from Liquipedia by page title
@@ -75,6 +79,71 @@ public class LiquipediaImportService {
             // Save to database
             Event savedEvent = eventService.saveEvent(event);
             log.info("Successfully imported tournament: {} (ID: {})", savedEvent.getName(), savedEvent.getId());
+
+            if(tournamentData.getMatches() != null && !tournamentData.getMatches().isEmpty()){
+                int importedMatches = 0;
+                int importedMaps = 0;
+                int totalMatches = tournamentData.getMatches().size();
+                
+                for(MatchData matchData : tournamentData.getMatches()){
+                    try {
+                        Match match = new Match();
+                        match.setTournamentId(savedEvent.getId());
+                        match.setTeamAId(getTeamIdFromBracket(matchData.getTeamA()));
+                        match.setTeamBId(getTeamIdFromBracket(matchData.getTeamB()));
+                        match.setTeamAScore(matchData.getScoreA());
+                        match.setTeamBScore(matchData.getScoreB());
+                        match.setMatchDate(matchData.getMatchDate());
+                        
+                        if(matchData.getWinner() != null){
+                            match.setWinnerTeamId(getTeamIdFromBracket(matchData.getWinner()));
+                        }
+                        
+                        // Determine stage from round info
+                        if(matchData.getRoundId() != null){
+                            String stage = liquipediaService.determineStageFromRound(
+                                matchData.getRoundId(), 
+                                totalMatches
+                            );
+                            match.setStage(stage);
+                        } else {
+                            match.setStage("Playoffs");
+                        }
+                        
+                        if(matchData.getMaps() != null && !matchData.getMaps().isEmpty()){
+                            
+                            for(MapData mapData : matchData.getMaps()){
+                                try {
+                                    Map map = new Map();
+                                    map.setMapName(mapData.getMapName());
+                                    map.setMatchId(match.getId());
+                                    map.setTeamACTRounds(mapData.getTeamBCTSideScore());
+                                    map.setTeamBTRounds(mapData.getTeamBTSideScore());
+                                    map.setTeamATRounds(mapData.getTeamATSideScore());
+                                    map.setTeamBCTRounds(mapData.getTeamBCTSideScore());
+                                    map.setTeamAFinalScore(mapData.getTeamAFinalScore());
+                                    map.setTeamBFinalScore(mapData.getTeamBFinalScore());
+                                    mapService.saveMap(map);
+                                    importedMaps++;
+                                } catch (Exception e) {
+
+                                }
+                            }
+                        }
+                        if(importedMaps == 1){
+                            match.setMatchType("Best of 1");
+                        } else if(importedMaps > 1){
+                            match.setMatchType("Best of " + importedMaps);
+                        } else {
+                            match.setMatchType("Unknown");
+                        }
+                        matchService.saveMatch(match);
+                        importedMatches++;
+                    } catch (Exception e) {
+                    }
+                }
+                log.info("Imported {} matches with a total of {} maps for tournament {}", importedMatches, importedMaps, savedEvent.getName());
+            }
 
             return savedEvent;
 
@@ -250,5 +319,29 @@ public class LiquipediaImportService {
             }
         }
         return "Failed to fetch content for page: " + pageTitle;
+    }
+
+    public Integer getTeamIdFromBracket(String bracketName){
+        List<Team> matchingTeams = teamService.searchTeamsByPageTitle(bracketName);
+        if(matchingTeams != null && !matchingTeams.isEmpty()){
+            if(matchingTeams.size() == 1){
+                return matchingTeams.get(0).getId();
+            }
+            //Filter out additional keywords commonly found in brackets (like Academy, Youth, Junior, etc)
+            for(Team team : matchingTeams){
+                String teamName = team.getName().toLowerCase();
+                String bracketLower = bracketName.toLowerCase();
+                if(bracketLower.contains(teamName)
+                    && !bracketLower.contains("academy")
+                    && !bracketLower.contains("youth")
+                    && !bracketLower.contains("junior")
+                    && !bracketLower.contains("women")
+                    && !bracketLower.contains("reserve")){
+                    //Get the team with the shortest name match
+                    return team.getId();
+                }
+            }
+        }
+        return null;
     }
 }

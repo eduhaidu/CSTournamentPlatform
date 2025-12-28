@@ -1,5 +1,7 @@
 package cs2.tournamentsite.tournamentserver.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import cs2.tournamentsite.tournamentserver.models.Match;
@@ -26,8 +28,7 @@ public class MatchService {
             existingMatch.setTournamentId(updatedMatch.getTournamentId());
             existingMatch.setTeamAId(updatedMatch.getTeamAId());
             existingMatch.setTeamBId(updatedMatch.getTeamBId());
-            existingMatch.setPlayedOn(updatedMatch.getPlayedOn());
-            existingMatch.setScheduledTime(updatedMatch.getScheduledTime());
+            existingMatch.setMatchDate(updatedMatch.getMatchDate());
             existingMatch.setResult(updatedMatch.getResult());
             existingMatch.setStatus(updatedMatch.getStatus());
             existingMatch.setTeamAScore(updatedMatch.getTeamAScore());
@@ -42,5 +43,9 @@ public class MatchService {
         if (matchRepository.existsById(id)) {
             matchRepository.deleteById(id);
         }
+    }
+
+    public List<Match> getMatchesByTournamentId(Integer tournamentId) {
+        return matchRepository.findByTournamentId(tournamentId);
     }
 }

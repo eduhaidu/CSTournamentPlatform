@@ -1,4 +1,141 @@
-.eventPage{
+.eventPage {
     padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.eventHeader {
+    margin-bottom: 40px;
+}
+
+.eventBanner {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.eventInfo {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.eventInfo h1 {
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+.eventInfo p {
+    margin: 10px 0;
+    color: #555;
+}
+
+.eventDescription {
+    margin-top: 20px;
+    line-height: 1.6;
+}
+
+.playoffsBracket {
+    margin-top: 30px;
+    overflow-x: auto;
+    padding: 20px;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.playoffsBracket h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+/* React-brackets styling */
+.bracket {
+    display: flex;
+    gap: 40px;
+    padding: 20px 0;
+}
+
+.bracket-round {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    min-width: 200px;
+}
+
+.bracket-round-title {
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    text-align: center;
+}
+
+.bracket-seed {
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    margin: 10px 0;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.bracket-seed:hover {
+    border-color: #3498db;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+    transform: translateY(-2px);
+}
+
+.bracket-seed:active {
+    transform: translateY(0);
+}
+
+.bracket-seed-wrapper {
+    width: 100%;
+}
+
+.bracket-team {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.bracket-team:last-child {
+    border-bottom: none;
+}
+
+.bracket-team-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.bracket-team-score {
+    font-weight: 700;
+    color: #3498db;
+    margin-left: 10px;
+}
+
+.bracket-seed-date {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    text-align: center;
+    padding: 8px;
+    background: #f8f9fa;
+}
+
+/* Mobile responsive */
+@media (max-width: 992px) {
+    .bracket {
+        flex-direction: column;
+    }
     
+    .bracket-round {
+        min-width: 100%;
+    }
 }

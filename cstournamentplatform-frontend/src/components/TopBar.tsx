@@ -38,7 +38,7 @@ export default function TopBar({ user }: TopBarProps) {
                 <li><Link to="/help">Help</Link></li>
                 {user ? (
                     <>
-                        <li><button onClick={() => setShowProfileMenu(!showProfileMenu)}>Profile</button>
+                        <li><button className="profileButton" onClick={() => setShowProfileMenu(!showProfileMenu)}>Profile</button>
                         {showProfileMenu && (
                             <ul className="profileMenu">
                                 <li><Link to="/profile">View Profile</Link></li>

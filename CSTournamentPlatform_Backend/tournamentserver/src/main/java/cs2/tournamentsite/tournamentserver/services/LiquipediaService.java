@@ -126,43 +126,46 @@ public class LiquipediaService {
             builder.description(description);
 
             // Parse matches
+            // Strategy: Look for ==Results== section first (major tournaments reference /Playoffs subpage)
+            // Then try to find brackets in main content or fetch /Playoffs subpage
 
-            int resultsStart = -1;
-            int resultsEnd = -1;
-            String resultsSection = "";
-
-            // Try "===Results===" first
-            resultsStart = wikiContent.indexOf("===Playoffs===");
-            if (resultsStart != -1) {
-                log.info("Found ===Playoffs=== section at position {}", resultsStart);
-                resultsEnd = wikiContent.indexOf("===", resultsStart + 13);
-                resultsSection = resultsEnd != -1 && resultsEnd > resultsStart
-                        ? wikiContent.substring(resultsStart, resultsEnd)
-                        : wikiContent.substring(resultsStart, Math.min(resultsStart + 5000, wikiContent.length()));
-            }
-            // Fetch from the /Playoffs page if not found
-            if (resultsStart == -1) {
+            String contentToSearch = wikiContent;
+            boolean fetchedPlayoffs = false;
+            
+            // Check if main page has ==Results== section (double equals, not triple)
+            int resultsIndex = wikiContent.indexOf("==Results==");
+            if (resultsIndex != -1) {
+                log.info("Found ==Results== section in main page, checking for subpage references");
+                // Major tournaments typically reference /Playoffs subpage, fetch it
                 String playoffsContent = fetchPageContent(pageTitle + "/Playoffs");
                 if (playoffsContent != null && !playoffsContent.isEmpty()) {
-                    resultsStart = playoffsContent.indexOf("===Results===");
-                    if (resultsStart != -1) {
-                        log.info("Found ===Results=== section in /Playoffs at position {}", resultsStart);
-                        resultsEnd = playoffsContent.indexOf("===", resultsStart + 13);
-                        resultsSection = resultsEnd != -1 && resultsEnd > resultsStart
-                                ? playoffsContent.substring(resultsStart, resultsEnd)
-                                : playoffsContent.substring(resultsStart,
-                                        Math.min(resultsStart + 5000, playoffsContent.length()));
-                    }
+                    contentToSearch = playoffsContent;
+                    fetchedPlayoffs = true;
+                    log.info("Using /Playoffs subpage content for bracket parsing");
                 }
             }
+            
+            // Now look for ===Results=== or ===Playoffs=== section (triple equals)
+            int resultsStart = contentToSearch.indexOf("===Results===");
+            if (resultsStart == -1) {
+                resultsStart = contentToSearch.indexOf("===Playoffs===");
+            }
+            
             if (resultsStart != -1) {
+                log.info("Found section at position {}", resultsStart);
+                int resultsEnd = contentToSearch.indexOf("===", resultsStart + 13);
+                String resultsSection = resultsEnd != -1 && resultsEnd > resultsStart
+                        ? contentToSearch.substring(resultsStart, resultsEnd)
+                        : contentToSearch.substring(resultsStart, Math.min(resultsStart + 10000, contentToSearch.length()));
+                
+                // Extract and parse bracket
                 String bracketContent = extractTemplateSection(resultsSection, "Bracket");
                 if (bracketContent != null) {
                     Pattern roundMatchPattern = Pattern.compile("\\|R(\\d+)M(\\d+)=");
                     Matcher matcher = roundMatchPattern.matcher(bracketContent);
                     while (matcher.find()) {
-                        int matchStart = matcher.start();
-                        String substringFromMatch = bracketContent.substring(matchStart + 4);
+                        // Use matcher.end() to get position right after |R1M1=
+                        String substringFromMatch = bracketContent.substring(matcher.end());
                         String matchTemplate = extractTemplateSection(substringFromMatch, "Match");
                         MatchData match = parseMatchData(matchTemplate);
                         if (match != null) {
@@ -173,9 +176,11 @@ public class LiquipediaService {
                                     match.getRoundId(), match.getMatchId());
                         }
                     }
+                } else {
+                    log.warn("No Bracket template found in Results section");
                 }
             } else {
-                log.warn("No Results section found for tournament: {}", pageTitle);
+                log.warn("No Results/Playoffs section found for tournament: {}", pageTitle);
             }
             builder.matches(matches);
             return builder.build();
@@ -581,8 +586,28 @@ public class LiquipediaService {
                     }
                 }
             }
+            String matchDateStr = extractTemplateParam(matchTemplate, "date");
+            if (matchDateStr != null) {
+                builder.matchDate(parseDate(matchDateStr).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime());
+            }
             // Parse maps
-
+            Pattern mapPattern = Pattern.compile("\\|map(\\d+)=");
+            Matcher mapMatcher = mapPattern.matcher(matchTemplate);
+            while (mapMatcher.find()) {
+                // Use matcher.end() to handle |map1= through |map99=
+                String substringFromMap = matchTemplate.substring(mapMatcher.end());
+                String mapTemplate = extractTemplateSection(substringFromMap, "Map");
+                MapData mapData = parseMapData(mapTemplate);
+                if (mapData != null) {
+                    maps.add(mapData);
+                    if ("A".equals(mapData.getWinner())) {
+                        teamAScore++;
+                    } else if ("B".equals(mapData.getWinner())) {
+                        teamBScore++;
+                    }
+                }
+            }
+            builder.maps(maps);
             String winner = teamAScore > teamBScore ? teamA : teamB;
             builder.teamA(teamA != null ? teamA : "Team A");
             builder.teamB(teamB != null ? teamB : "Team B");
@@ -623,10 +648,49 @@ public class LiquipediaService {
             builder.winner(winner);
             return builder.build();
 
-        } catch (Exception e) {
+        } catch (NumberFormatException e) {
             log.error("Error parsing map data: {}", mapTemplate, e);
             return null;
         }
+    }
+
+    /**
+     * Determines the tournament stage based on bracket round number and total teams
+     * Follows standard single-elimination bracket naming
+     */
+    public String determineStageFromRound(int roundId, int totalMatchesInBracket) {
+        // Calculate total teams from total matches in bracket
+        // Single elimination: 8 teams = 7 matches (4 QF + 2 SF + 1 GF)
+        // With 3rd place: 8 teams = 8 matches (4 QF + 2 SF + 1 GF + 1 3rd)
+        
+        if (roundId == 1) {
+            // Round 1 could be Ro32, Ro16, or Quarterfinals depending on bracket size
+            if (totalMatchesInBracket >= 15) { // 16 teams
+                return "Round of 16";
+            } else if (totalMatchesInBracket >= 7) { // 8 teams
+                return "Quarterfinals";
+            } else if (totalMatchesInBracket >= 3) { // 4 teams
+                return "Semifinals";
+            }
+            return "Playoffs";
+        } else if (roundId == 2) {
+            if (totalMatchesInBracket >= 15) { // 16 teams -> R2 is QF
+                return "Quarterfinals";
+            } else if (totalMatchesInBracket >= 7) { // 8 teams -> R2 is SF
+                return "Semifinals";
+            }
+            return "Grand Final";
+        } else if (roundId == 3) {
+            if (totalMatchesInBracket >= 15) { // 16 teams -> R3 is SF
+                return "Semifinals";
+            }
+            return "Grand Final";
+        } else if (roundId == 4) {
+            return "Grand Final";
+        }
+        
+        // Handle special cases like Third Place Match (RxMTP identifier)
+        return "Playoffs";
     }
 
 }

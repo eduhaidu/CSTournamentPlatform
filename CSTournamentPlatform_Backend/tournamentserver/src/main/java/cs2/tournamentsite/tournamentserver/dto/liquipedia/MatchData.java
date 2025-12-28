@@ -3,6 +3,8 @@ package cs2.tournamentsite.tournamentserver.dto.liquipedia;
 import lombok.Data;
 import lombok.Builder;
 import cs2.tournamentsite.tournamentserver.dto.liquipedia.MapData;
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -16,4 +18,5 @@ public class MatchData {
     private Integer scoreB;
     private String winner;
     private List<MapData> maps;
+    private LocalDateTime matchDate;
 }

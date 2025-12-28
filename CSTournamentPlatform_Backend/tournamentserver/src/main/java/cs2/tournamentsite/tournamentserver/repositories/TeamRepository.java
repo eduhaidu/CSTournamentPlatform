@@ -5,6 +5,8 @@
 
 package cs2.tournamentsite.tournamentserver.repositories;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import cs2.tournamentsite.tournamentserver.models.Team;
@@ -15,4 +17,8 @@ import cs2.tournamentsite.tournamentserver.models.Team;
  */
 public interface TeamRepository extends JpaRepository<Team, Object>{
     public Team findByName(String name);
+    public boolean existsByName(String name);
+    public Team findByPageTitle(String pageTitle);
+    public boolean existsByPageTitle(String pageTitle);
+    public List<Team> findByPageTitleContainingIgnoreCase(String pageTitle);
 }
