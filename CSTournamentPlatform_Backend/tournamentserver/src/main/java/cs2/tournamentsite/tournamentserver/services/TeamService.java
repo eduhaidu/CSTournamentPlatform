@@ -54,4 +54,12 @@ public class TeamService {
     public List<Team> searchTeamsByPageTitle(String pageTitle) {
         return teamRepository.findByPageTitleContainingIgnoreCase(pageTitle);
     }
+    
+    public Team findByAlias(String alias) {
+        return teamRepository.findByAliasIgnoreCase(alias);
+    }
+    
+    public List<Team> searchTeamsByName(String name) {
+        return teamRepository.findByNameContainingIgnoreCase(name);
+    }
 }

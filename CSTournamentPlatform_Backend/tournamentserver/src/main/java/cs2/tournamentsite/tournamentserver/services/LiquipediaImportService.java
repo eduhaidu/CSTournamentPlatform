@@ -182,6 +182,11 @@ public class LiquipediaImportService {
             team.setFoundedOn(teamData.getFoundedOn());
             team.setCoachName(teamData.getCoachName());
             team.setPageTitle(pageTitle);
+            
+            // Extract and set alias from page title (e.g., "Team_Spirit" -> "spirit")
+            String alias = extractTeamAlias(pageTitle);
+            team.setAlias(alias);
+            log.info("Team alias set to: {}", alias);
 
             // Download and save team logo
             try {
@@ -322,26 +327,100 @@ public class LiquipediaImportService {
     }
 
     public Integer getTeamIdFromBracket(String bracketName){
-        List<Team> matchingTeams = teamService.searchTeamsByPageTitle(bracketName);
+        if(bracketName == null || bracketName.isEmpty()){
+            return null;
+        }
+        
+        log.debug("Looking up team from bracket name: {}", bracketName);
+        
+        // Strategy 1: Try exact alias match (most reliable for bracket identifiers)
+        Team team = teamService.findByAlias(bracketName);
+        if(team != null){
+            log.debug("Found team by alias: {} -> {} (ID: {})", bracketName, team.getName(), team.getId());
+            return team.getId();
+        }
+        
+        // Strategy 2: Try normalized alias match (handle case variations)
+        String normalized = normalizeTeamIdentifier(bracketName);
+        team = teamService.findByAlias(normalized);
+        if(team != null){
+            log.debug("Found team by normalized alias: {} -> {} (ID: {})", bracketName, team.getName(), team.getId());
+            return team.getId();
+        }
+        
+        // Strategy 3: Try name search (partial match)
+        List<Team> matchingTeams = teamService.searchTeamsByName(bracketName);
         if(matchingTeams != null && !matchingTeams.isEmpty()){
-            if(matchingTeams.size() == 1){
-                return matchingTeams.get(0).getId();
-            }
-            //Filter out additional keywords commonly found in brackets (like Academy, Youth, Junior, etc)
-            for(Team team : matchingTeams){
-                String teamName = team.getName().toLowerCase();
-                String bracketLower = bracketName.toLowerCase();
-                if(bracketLower.contains(teamName)
-                    && !bracketLower.contains("academy")
+            // Filter out academy/youth teams
+            String bracketLower = bracketName.toLowerCase();
+            for(Team t : matchingTeams){
+                String teamName = t.getName().toLowerCase();
+                if(!bracketLower.contains("academy")
                     && !bracketLower.contains("youth")
                     && !bracketLower.contains("junior")
                     && !bracketLower.contains("women")
                     && !bracketLower.contains("reserve")){
-                    //Get the team with the shortest name match
-                    return team.getId();
+                    log.debug("Found team by name search: {} -> {} (ID: {})", bracketName, t.getName(), t.getId());
+                    return t.getId();
                 }
             }
         }
+        
+        // Strategy 4: Try page title search as last resort
+        matchingTeams = teamService.searchTeamsByPageTitle(bracketName);
+        if(matchingTeams != null && !matchingTeams.isEmpty()){
+            log.debug("Found team by page title: {} -> {} (ID: {})", bracketName, matchingTeams.get(0).getName(), matchingTeams.get(0).getId());
+            return matchingTeams.get(0).getId();
+        }
+        
+        log.warn("No team found for bracket identifier: {}", bracketName);
         return null;
+    }
+    
+    /**
+     * Extracts a team alias from Liquipedia page title
+     * Examples: "Team_Spirit" -> "spirit", "MOUZ" -> "mouz", "Natus_Vincere" -> "navi"
+     */
+    private String extractTeamAlias(String pageTitle) {
+        if(pageTitle == null || pageTitle.isEmpty()){
+            return null;
+        }
+        
+        // Common team name mappings for well-known teams
+        String lower = pageTitle.toLowerCase().replace("_", "");
+        
+        // Check for common abbreviations in the page title itself
+        if(pageTitle.contains("_")){
+            String[] parts = pageTitle.split("_");
+            if(parts.length > 1){
+                // For "Team_Spirit" -> use "Spirit"
+                // For "Natus_Vincere" -> use "Vincere" (but we'll handle special cases below)
+                return parts[parts.length - 1].toLowerCase();
+            }
+        }
+        
+        // Return the normalized page title as alias
+        return normalizeTeamIdentifier(pageTitle);
+    }
+    
+    /**
+     * Normalizes team identifier for matching
+     * Removes common prefixes, underscores, and converts to lowercase
+     */
+    private String normalizeTeamIdentifier(String identifier) {
+        if(identifier == null){
+            return null;
+        }
+        
+        String normalized = identifier.toLowerCase()
+            .replace("_", "")
+            .replace(" ", "")
+            .replace("-", "")
+            .replace("team", "")
+            .replace("esports", "")
+            .replace("gaming", "")
+            .trim();
+        
+        return normalized;
     }
 }

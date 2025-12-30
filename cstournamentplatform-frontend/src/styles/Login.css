@@ -4,14 +4,14 @@
     align-items: center;
     justify-content: center;
     height: 100vh;
-    background-color: #f5f5f5;
+    background-color: #434343;
 }
 
 .login form {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    background-color: #ffffff;
+    background-color: #666666;
     padding: 32px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);

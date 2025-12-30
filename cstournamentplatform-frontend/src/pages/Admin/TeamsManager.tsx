@@ -5,6 +5,7 @@ import "../../styles/TeamsManager.css";
 interface Team {
     id: number;
     name: string;
+    alias?: string;
     country: string;
     foundedOn: string;
     coachName: string;
@@ -26,6 +27,7 @@ export default function TeamsManager() {
     const [isCreating, setIsCreating] = useState(false);
     const [formData, setFormData] = useState<Partial<Team>>({
         name: "",
+        alias: "",
         country: "",
         foundedOn: "",
         coachName: "",
@@ -79,6 +81,7 @@ export default function TeamsManager() {
         setEditingTeam(null);
         setFormData({
             name: "",
+            alias: "",
             country: "",
             foundedOn: "",
             coachName: "",
@@ -91,6 +94,7 @@ export default function TeamsManager() {
         setIsCreating(false);
         setFormData({
             name: team.name,
+            alias: team.alias || "",
             country: team.country,
             foundedOn: team.foundedOn,
             coachName: team.coachName,
@@ -132,6 +136,7 @@ export default function TeamsManager() {
             setEditingTeam(null);
             setFormData({
                 name: "",
+                alias: "",
                 country: "",
                 foundedOn: "",
                 coachName: "",
@@ -163,6 +168,7 @@ export default function TeamsManager() {
         setEditingTeam(null);
         setFormData({
             name: "",
+            alias: "",
             country: "",
             foundedOn: "",
             coachName: "",
@@ -195,6 +201,21 @@ export default function TeamsManager() {
                                 onChange={handleInputChange}
                                 required
                             />
+                        </div>
+
+                        <div className="formGroup">
+                            <label htmlFor="alias">Alias</label>
+                            <input
+                                type="text"
+                                id="alias"
+                                name="alias"
+                                value={formData.alias || ""}
+                                onChange={handleInputChange}
+                                placeholder="e.g., spirit, mouz, navi (used in brackets)"
+                            />
+                            <small style={{ color: '#888', fontSize: '0.85em', marginTop: '4px', display: 'block' }}>
+                                Short identifier used in tournament brackets. Usually lowercase.
+                            </small>
                         </div>
 
                         <div className="formRow">
@@ -283,6 +304,7 @@ export default function TeamsManager() {
                                 <div className="teamDetails">
                                     <h3>{team.name}</h3>
                                     <div className="teamMeta">
+                                        {team.alias && <p><strong>Alias:</strong> {team.alias}</p>}
                                         <p><strong>Country:</strong> {team.country}</p>
                                         {team.foundedOn && <p><strong>Founded:</strong> {team.foundedOn}</p>}
                                         {team.coachName && <p><strong>Coach:</strong> {team.coachName}</p>}

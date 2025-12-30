@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import "../styles/Register.css";
 
 export default function Register(){
     const { login } = useAuth();

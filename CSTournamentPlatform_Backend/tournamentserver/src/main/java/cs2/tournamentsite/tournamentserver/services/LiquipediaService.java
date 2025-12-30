@@ -126,43 +126,66 @@ public class LiquipediaService {
             builder.description(description);
 
             // Parse matches
-            // Strategy: Look for ==Results== section first (major tournaments reference /Playoffs subpage)
-            // Then try to find brackets in main content or fetch /Playoffs subpage
+            // Strategy: Try to find bracket in main content first
+            // If not found, fetch /Playoffs subpage as fallback
 
             String contentToSearch = wikiContent;
             boolean fetchedPlayoffs = false;
             
-            // Check if main page has ==Results== section (double equals, not triple)
-            int resultsIndex = wikiContent.indexOf("==Results==");
-            if (resultsIndex != -1) {
-                log.info("Found ==Results== section in main page, checking for subpage references");
-                // Major tournaments typically reference /Playoffs subpage, fetch it
+            // First, try to find bracket in main page content
+            String bracketContent = extractBracketSection(wikiContent);
+            
+            // If no bracket found in main page, try /Playoffs subpage
+            if (bracketContent == null || bracketContent.isEmpty()) {
+                log.info("No bracket found in main page, trying /Playoffs subpage");
                 String playoffsContent = fetchPageContent(pageTitle + "/Playoffs");
                 if (playoffsContent != null && !playoffsContent.isEmpty()) {
                     contentToSearch = playoffsContent;
                     fetchedPlayoffs = true;
-                    log.info("Using /Playoffs subpage content for bracket parsing");
+                    log.info("Successfully fetched /Playoffs subpage content");
+                    bracketContent = extractBracketSection(playoffsContent);
+                } else {
+                    log.warn("Failed to fetch /Playoffs subpage for: {}", pageTitle);
                 }
             }
             
-            // Now look for ===Results=== or ===Playoffs=== section (triple equals)
+            // Now look for ===Results=== or ===Playoffs=== or ==Results== section
             int resultsStart = contentToSearch.indexOf("===Results===");
             if (resultsStart == -1) {
                 resultsStart = contentToSearch.indexOf("===Playoffs===");
             }
+            if (resultsStart == -1) {
+                resultsStart = contentToSearch.indexOf("==Results==");
+            }
             
-            if (resultsStart != -1) {
-                log.info("Found section at position {}", resultsStart);
-                int resultsEnd = contentToSearch.indexOf("===", resultsStart + 13);
-                String resultsSection = resultsEnd != -1 && resultsEnd > resultsStart
-                        ? contentToSearch.substring(resultsStart, resultsEnd)
-                        : contentToSearch.substring(resultsStart, Math.min(resultsStart + 10000, contentToSearch.length()));
+            if (resultsStart != -1 || (bracketContent != null && !bracketContent.isEmpty())) {
+                String resultsSection = null;
+                
+                if (resultsStart != -1) {
+                    log.info("Found Results/Playoffs section at position {}", resultsStart);
+                    int resultsEnd = contentToSearch.indexOf("===", resultsStart + 13);
+                    if (resultsEnd == -1) {
+                        resultsEnd = contentToSearch.indexOf("==", resultsStart + 11);
+                    }
+                    resultsSection = resultsEnd != -1 && resultsEnd > resultsStart
+                            ? contentToSearch.substring(resultsStart, resultsEnd)
+                            : contentToSearch.substring(resultsStart, Math.min(resultsStart + 10000, contentToSearch.length()));
+                    
+                    log.info("Results section length: {}", resultsSection.length());
+                    log.debug("Results section preview: {}", resultsSection.substring(0, Math.min(500, resultsSection.length())));
+                    
+                    // Try to extract bracket from results section if not already found
+                    if (bracketContent == null || bracketContent.isEmpty()) {
+                        bracketContent = extractBracketSection(resultsSection);
+                    }
+                }
                 
                 // Extract and parse bracket
-                String bracketContent = extractTemplateSection(resultsSection, "Bracket");
-                if (bracketContent != null) {
+                if (bracketContent != null && !bracketContent.isEmpty()) {
+                    log.info("Found bracket content, length: {}", bracketContent.length());
                     Pattern roundMatchPattern = Pattern.compile("\\|R(\\d+)M(\\d+)=");
                     Matcher matcher = roundMatchPattern.matcher(bracketContent);
+                    int matchCount = 0;
                     while (matcher.find()) {
                         // Use matcher.end() to get position right after |R1M1=
                         String substringFromMatch = bracketContent.substring(matcher.end());
@@ -172,12 +195,23 @@ public class LiquipediaService {
                             match.setRoundId(Integer.parseInt(matcher.group(1)));
                             match.setMatchId(Integer.parseInt(matcher.group(2)));
                             matches.add(match);
-                            log.info("Parsed match: {} vs {} (Round {}, Match {})", match.getTeamA(), match.getTeamB(),
+                            matchCount++;
+                            log.info("Parsed match {}: {} vs {} (Round {}, Match {})", matchCount, match.getTeamA(), match.getTeamB(),
                                     match.getRoundId(), match.getMatchId());
                         }
                     }
+                    log.info("Total matches parsed: {}", matchCount);
                 } else {
-                    log.warn("No Bracket template found in Results section");
+                    log.warn("No Bracket template found in page content{}", fetchedPlayoffs ? " (including /Playoffs subpage)" : "");
+                    // Debug: check what's in the content
+                    String searchContent = resultsSection != null ? resultsSection : contentToSearch;
+                    if (searchContent.contains("Bracket")) {
+                        log.info("Content contains 'Bracket' keyword but extraction failed");
+                        int bracketPos = searchContent.indexOf("Bracket");
+                        log.debug("Context around Bracket: {}", 
+                            searchContent.substring(Math.max(0, bracketPos - 20), 
+                                                    Math.min(searchContent.length(), bracketPos + 100)));
+                    }
                 }
             } else {
                 log.warn("No Results/Playoffs section found for tournament: {}", pageTitle);
@@ -531,15 +565,15 @@ public class LiquipediaService {
         int openBracketCount = 0;
         int closedBracketCount = 0;
         if (sectionStart == -1) {
-            log.warn(prefix + " not found");
+            log.debug(prefix + " not found");
             return null;
         }
         openBracketCount++;
-        log.info("Found " + prefix + " at position: " + sectionStart);
+        log.debug("Found " + prefix + " at position: " + sectionStart);
         int maxIterations = 10000;
         int iterations = 0;
         int currentIndex = sectionStart + 2;
-        while (closedBracketCount < openBracketCount && iterations++ < maxIterations) {
+        while (closedBracketCount < openBracketCount && iterations++ < maxIterations && currentIndex < content.length() - 1) {
             if (content.substring(currentIndex, currentIndex + 2).equals("{{")) {
                 openBracketCount++;
             }
@@ -554,6 +588,52 @@ public class LiquipediaService {
         sectionEnd = currentIndex;
         section = content.substring(sectionStart, sectionEnd);
         return section;
+    }
+
+    /**
+     * Extracts bracket section with more flexible matching
+     * Matches {{Bracket|...}} or {{Bracket/8|...}} etc.
+     */
+    private String extractBracketSection(String content) {
+        // Look for {{Bracket with any suffix (|, /, space, etc.)
+        Pattern bracketPattern = Pattern.compile("\\{\\{Bracket[\\|/]");
+        Matcher matcher = bracketPattern.matcher(content);
+        
+        if (!matcher.find()) {
+            log.warn("No Bracket template found");
+            return null;
+        }
+        
+        int sectionStart = matcher.start();
+        int openBracketCount = 1;
+        int closedBracketCount = 0;
+        int currentIndex = sectionStart + 2;
+        int maxIterations = 50000; // Brackets can be very long
+        int iterations = 0;
+        
+        while (closedBracketCount < openBracketCount && iterations++ < maxIterations && currentIndex < content.length() - 1) {
+            if (currentIndex + 1 < content.length()) {
+                String twoChars = content.substring(currentIndex, currentIndex + 2);
+                if (twoChars.equals("{{")) {
+                    openBracketCount++;
+                    currentIndex++; // Skip next char
+                } else if (twoChars.equals("}}")) {
+                    closedBracketCount++;
+                    currentIndex++; // Skip next char
+                }
+            }
+            currentIndex++;
+        }
+        
+        if (iterations >= maxIterations) {
+            log.error("Hit max iterations while extracting Bracket - possible infinite loop!");
+            return null;
+        }
+        
+        String bracketContent = content.substring(sectionStart, currentIndex);
+        log.info("Extracted bracket section: {} chars, open: {}, closed: {}", 
+                bracketContent.length(), openBracketCount, closedBracketCount);
+        return bracketContent;
     }
 
     public MatchData parseMatchData(String matchTemplate) {

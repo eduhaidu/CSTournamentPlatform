@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import "../styles/Login.css";
 
 export default function Login(){
     const { login } = useAuth();

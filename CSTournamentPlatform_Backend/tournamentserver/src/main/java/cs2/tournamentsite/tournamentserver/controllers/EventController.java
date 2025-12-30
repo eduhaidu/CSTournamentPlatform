@@ -38,14 +38,14 @@ public class EventController {
         return eventService.getAllEvents();
     }
 
-    @GetMapping("/{name}")
-    public Event getEventByName(@RequestParam String name) {
-        return eventService.getEventByName(name);
+    @GetMapping("/{id}")
+    public Event getEventById(@PathVariable Integer id) {
+        return eventService.findEventById(id);
     }
 
-    @GetMapping("/{id}")
-    public Event getEventById(@RequestParam Integer id) {
-        return eventService.findEventById(id);
+    @GetMapping("/by-name")
+    public Event getEventByName(@RequestParam String name) {
+        return eventService.getEventByName(name);
     }
     
     @PostMapping("/add")

@@ -21,4 +21,6 @@ public interface TeamRepository extends JpaRepository<Team, Object>{
     public Team findByPageTitle(String pageTitle);
     public boolean existsByPageTitle(String pageTitle);
     public List<Team> findByPageTitleContainingIgnoreCase(String pageTitle);
+    public Team findByAliasIgnoreCase(String alias);
+    public List<Team> findByNameContainingIgnoreCase(String name);
 }
