@@ -1,5 +1,6 @@
 import axios from "../config/axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import TeamCard from "../components/TeamCard";
 import { useAuth } from "../hooks/useAuth";
 import TopBar from "../components/TopBar";
@@ -14,6 +15,7 @@ interface Team {
 export default function TeamsList() {
     const [teams, setTeams] = useState<Team[]>([]);
     const {user} = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchTeamsAndMembers = async () => {
@@ -40,17 +42,19 @@ export default function TeamsList() {
         }
         fetchTeamsAndMembers();
     }, []);
+    
     return (
         <div className="teamsList">
             <TopBar user={user}/>
             <h1>Teams List Page</h1>
             {teams.map((team: any) => (
-                <TeamCard 
-                    key={team.id}
-                    name={team.name}
-                    members={team.members}
-                    logoPath={team.logoPath}
-                />
+                <div key={team.id} onClick={() => navigate(`/team/${team.id}`)} style={{ cursor: 'pointer' }}>
+                    <TeamCard 
+                        name={team.name}
+                        members={team.members}
+                        logoPath={team.logoPath}
+                    />
+                </div>
             ))}
         </div>
     );

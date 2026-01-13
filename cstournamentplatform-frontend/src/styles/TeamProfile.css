@@ -1,0 +1,226 @@
+.teamProfile {
+    min-height: 100vh;
+    background: #595959;
+}
+
+.teamProfileContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.backButton {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: all 0.2s ease;
+}
+
+.backButton:hover {
+    background: #5568d3;
+    transform: translateX(-5px);
+}
+
+.teamHeader {
+    background: rgb(136, 136, 136);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 30px;
+}
+
+.teamLogo {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    border-radius: 12px;
+    background: #636363;
+    padding: 10px;
+}
+
+.teamHeaderInfo {
+    flex: 1;
+}
+
+.teamHeaderInfo h1 {
+    margin: 0 0 10px 0;
+    color: #2c3e50;
+    font-size: 2.5rem;
+}
+
+.teamAlias {
+    color: #7f8c8d;
+    font-style: italic;
+    font-size: 1.2rem;
+    margin: 5px 0 15px 0;
+}
+
+.teamCountry {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    color: #555;
+}
+
+.teamCountry .countryFlag {
+    font-size: 1.5rem;
+}
+
+.teamInfo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.infoCard {
+    background: rgb(106, 106, 106);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.infoCard h3 {
+    margin: 0 0 10px 0;
+    color: #667eea;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.infoCard p {
+    margin: 0;
+    color: #dadada;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.playersSection {
+    background: rgb(100, 100, 100);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.playersSection h2 {
+    margin: 0 0 30px 0;
+    color: #e0e0e0;
+    font-size: 2rem;
+}
+
+.playersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.playerCard {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.playerCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border-color: #667eea;
+}
+
+.playerPhoto {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border: 3px solid #667eea;
+}
+
+.playerInfo {
+    width: 100%;
+}
+
+.playerInfo h3 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+    font-size: 1.3rem;
+}
+
+.playerRealName {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin: 0 0 10px 0;
+}
+
+.playerRole {
+    display: inline-block;
+    background: #667eea;
+    color: rgb(142, 142, 142);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 10px 0;
+}
+
+.playerCountry {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    color: #d4d4d4;
+    font-size: 0.9rem;
+}
+
+.playerCountry .countryFlag {
+    font-size: 1.2rem;
+}
+
+.noPlayers {
+    text-align: center;
+    color: #7f8c8d;
+    font-size: 1.1rem;
+    padding: 40px;
+}
+
+.loading, .error {
+    text-align: center;
+    padding: 100px 20px;
+    font-size: 1.5rem;
+    color: #7f8c8d;
+}
+
+.error {
+    color: #e74c3c;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .teamHeader {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .teamHeaderInfo h1 {
+        font-size: 2rem;
+    }
+
+    .playersGrid {
+        grid-template-columns: 1fr;
+    }
+}

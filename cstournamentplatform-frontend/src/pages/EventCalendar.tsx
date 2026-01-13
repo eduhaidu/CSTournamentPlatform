@@ -5,23 +5,27 @@ import { useEffect, useState } from "react";
 import axios from "../config/axios";
 import { useAuth } from "../hooks/useAuth";
 import TopBar from "../components/TopBar";
+import { useNavigate } from "react-router-dom";
 
 interface Event {
     id: number;
-    title: string;
-    date: string;
-    location: string;
+    name: string;
+    startDate: string;
+    endDate: string;
+    location?: string;
     bannerPath?: string;
 }
 
 export default function EventCalendar() {
     const [events, setEvents] = useState<Event[]>([]);
     const {user} = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchEvents = async () => {
             try {
                 const response = await axios.get("/events/all");
+                console.log("Fetched events for calendar:", response.data);
                 setEvents(response.data);
             } catch (error) {
                 console.error("Error fetching events:", error);
@@ -39,12 +43,21 @@ export default function EventCalendar() {
                 initialView="dayGridMonth"
                 events={events.map(event => ({
                     id: event.id.toString(),
-                    title: event.title,
-                    date: event.date
+                    title: event.name,
+                    start: event.startDate,
+                    end: event.endDate,
+                    backgroundColor: '#667eea',
+                    borderColor: '#764ba2'
                 }))}
                 eventClick={(info) => {
                     const eventId = info.event.id;
-                    window.location.href = `/events/${eventId}`;
+                    navigate(`/events/${eventId}`);
+                }}
+                height="auto"
+                headerToolbar={{
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,dayGridWeek'
                 }}
             />
         </div>

@@ -22,13 +22,23 @@ import lombok.RequiredArgsConstructor;
 public class PlayerController {
     private final PlayerService playerService;
 
+    @GetMapping("/all")
+    public List<Player> getAllPlayers() {
+        return playerService.getAllPlayers();
+    }
+
     @GetMapping("/{id}")
     public Player getPlayerById(@PathVariable Integer id) {
         return playerService.findPlayerById(id);
     }
 
-    @PostMapping("/create")
+    @PostMapping
     public Player createPlayer(@RequestBody Player player) {
+        return playerService.savePlayer(player);
+    }
+
+    @PostMapping("/create")
+    public Player createPlayerLegacy(@RequestBody Player player) {
         return playerService.savePlayer(player);
     }
 

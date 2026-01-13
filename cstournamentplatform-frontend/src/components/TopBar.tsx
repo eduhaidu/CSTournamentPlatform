@@ -19,7 +19,6 @@ export default function TopBar({ user }: TopBarProps) {
         
         <nav className="topBar-nav">
             <ul className="topBar-nav-left">
-                <li><Link to="/matches">Matches</Link></li>
                 <li>
                     <button className="eventButton" onClick={()=>setShowEventMenu(!showEventMenu)}>Events</button>
                     {showEventMenu && (

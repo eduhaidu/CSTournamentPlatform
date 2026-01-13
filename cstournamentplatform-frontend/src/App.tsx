@@ -9,8 +9,11 @@ import Logout from './pages/Logout';
 import EventsList from './pages/EventsList';
 import Liquipedia from './pages/Liquipedia';
 import TeamsList from './pages/TeamsList';
+import TeamProfile from './pages/TeamProfile';
+import PlayerProfile from './pages/PlayerProfile';
 import EventsManager from './pages/Admin/EventsManager';
 import TeamsManager from './pages/Admin/TeamsManager';
+import PlayersManager from './pages/Admin/PlayersManager';
 import MatchesManager from './pages/Admin/MatchesManager';
 import EventPage from './pages/EventPage';
 import EventCalendar from './pages/EventCalendar';
@@ -29,9 +32,11 @@ function App() {
           <Route path="/events/:id" element={<EventPage/>} />
           <Route path="/events/calendar" element={<EventCalendar />} />
           <Route path="/teams" element={<TeamsList />} />
+          <Route path="/team/:id" element={<TeamProfile />} />
+          <Route path="/player/:id" element={<PlayerProfile />} />
           <Route path="/admin/liquipedia" element={<Liquipedia />} />
           <Route path="/admin/events" element={<EventsManager />} />
-          <Route path="/admin/teams" element={<TeamsManager />} />
+          <Route path="/admin/teams" element={<TeamsManager />} />          <Route path="/admin/players" element={<PlayersManager />} />          <Route path="/admin/players" element={<PlayersManager />} />
           <Route path="/admin/matches" element={<MatchesManager />} />
         </Routes>
       </Router>

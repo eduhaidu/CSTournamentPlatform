@@ -1,0 +1,353 @@
+.playersManager {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding-bottom: 40px;
+}
+
+.playersManagerContainer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    color: #ecf0f1;
+    font-size: 36px;
+    margin: 0;
+}
+
+.createButton {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.createButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.playersTable {
+    background: rgba(44, 62, 80, 0.6);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.playersTable table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.playersTable thead {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.playersTable th {
+    padding: 16px;
+    text-align: left;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+}
+
+.playersTable th:first-child {
+    border-top-left-radius: 8px;
+}
+
+.playersTable th:last-child {
+    border-top-right-radius: 8px;
+}
+
+.playersTable tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: background-color 0.2s ease;
+}
+
+.playersTable tbody tr:hover {
+    background-color: rgba(102, 126, 234, 0.15);
+}
+
+.playersTable td {
+    padding: 16px;
+    color: #ecf0f1;
+}
+
+.playerNickname {
+    font-weight: 600;
+    color: #7c9aff;
+}
+
+.teamSelect, .statusSelect {
+    padding: 8px 12px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-size: 14px;
+    background: rgba(52, 73, 94, 0.8);
+    color: #ecf0f1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.teamSelect:hover, .statusSelect:hover {
+    border-color: #667eea;
+    background: rgba(52, 73, 94, 1);
+}
+
+.teamSelect:focus, .statusSelect:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.statusBadge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.statusBadge.active {
+    background: rgba(46, 213, 115, 0.2);
+    color: #2ed573;
+    border: 1px solid #2ed573;
+}
+
+.statusBadge.benched {
+    background: rgba(255, 195, 18, 0.2);
+    color: #ffc312;
+    border: 1px solid #ffc312;
+}
+
+.statusBadge.free_agent {
+    background: rgba(52, 152, 219, 0.2);
+    color: #3498db;
+    border: 1px solid #3498db;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.editButton, .deleteButton {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.editButton {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.editButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.deleteButton {
+    background: #e74c3c;
+    color: white;
+}
+
+.deleteButton:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+    backdrop-filter: blur(5px);
+}
+
+.modalContent {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modalContent h2 {
+    margin: 0 0 24px 0;
+    color: #ecf0f1;
+    font-size: 28px;
+}
+
+.formGroup {
+    margin-bottom: 20px;
+}
+
+.formGroup label {
+    display: block;
+    margin-bottom: 8px;
+    color: #bdc3c7;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.formGroup input, .formGroup select {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: rgba(52, 73, 94, 0.8);
+    color: #ecf0f1;
+}
+
+.formGroup input::placeholder {
+    color: #7f8c8d;
+}
+
+.formGroup input:focus, .formGroup select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    background: rgba(52, 73, 94, 1);
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.modalActions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+}
+
+.saveButton, .cancelButton {
+    flex: 1;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.saveButton {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.saveButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.cancelButton {
+    background: rgba(149, 165, 166, 0.3);
+    color: #ecf0f1;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.cancelButton:hover {
+    background: rgba(149, 165, 166, 0.5);
+}
+
+/* Scrollbar Styling */
+.modalContent::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modalContent::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+    background: rgba(102, 126, 234, 0.6);
+    border-radius: 10px;
+}
+
+.modalContent::-webkit-scrollbar-thumb:hover {
+    background: rgba(102, 126, 234, 0.8);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .header h1 {
+        font-size: 28px;
+    }
+
+    .createButton {
+        width: 100%;
+    }
+
+    .playersTable {
+        padding: 12px;
+    }
+
+    .playersTable th, .playersTable td {
+        padding: 12px 8px;
+        font-size: 14px;
+    }
+
+    .formRow {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        flex-direction: column;
+    }
+
+    .editButton, .deleteButton {
+        width: 100%;
+    }
+}

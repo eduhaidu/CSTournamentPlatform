@@ -1,0 +1,250 @@
+.home {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.homeContainer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 30px;
+}
+
+.hero {
+    text-align: center;
+    padding: 60px 20px;
+    margin-bottom: 60px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-radius: 20px;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.hero h1 {
+    font-size: 48px;
+    color: #ecf0f1;
+    margin: 0 0 20px 0;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.heroSubtitle {
+    font-size: 20px;
+    color: #bdc3c7;
+    margin: 0;
+}
+
+.upcomingEventsSection {
+    margin-bottom: 60px;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.sectionHeader h2 {
+    font-size: 36px;
+    color: #ecf0f1;
+    margin: 0;
+}
+
+.viewAllButton {
+    background: transparent;
+    border: 2px solid #667eea;
+    color: #667eea;
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.viewAllButton:hover {
+    background: #667eea;
+    color: white;
+    transform: translateX(5px);
+}
+
+.loadingMessage {
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 20px;
+    color: #bdc3c7;
+}
+
+.eventsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 24px;
+}
+
+.eventCard {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.eventCard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3);
+}
+
+.eventLogo {
+    width: 100%;
+    height: 200px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.eventLogo img {
+    max-width: 80%;
+    max-height: 80%;
+    object-fit: contain;
+}
+
+.liveBadge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: #e74c3c;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    animation: pulse 2s infinite;
+    z-index: 10;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.eventContent {
+    padding: 24px;
+}
+
+.eventContent h3 {
+    font-size: 22px;
+    color: #2c3e50;
+    margin: 0 0 16px 0;
+    font-weight: 700;
+}
+
+.eventDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.eventDate, .eventLocation, .eventPrize {
+    color: #7f8c8d;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.noEvents {
+    text-align: center;
+    padding: 80px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+}
+
+.noEvents p {
+    color: #bdc3c7;
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.quickLinks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin-top: 60px;
+}
+
+.quickLinkCard {
+    background: white;
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.quickLinkCard:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.3);
+}
+
+.quickLinkIcon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.quickLinkCard h3 {
+    font-size: 22px;
+    color: #2c3e50;
+    margin: 0 0 12px 0;
+    font-weight: 700;
+}
+
+.quickLinkCard p {
+    color: #7f8c8d;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 32px;
+    }
+
+    .heroSubtitle {
+        font-size: 16px;
+    }
+
+    .sectionHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .sectionHeader h2 {
+        font-size: 28px;
+    }
+
+    .viewAllButton {
+        width: 100%;
+    }
+
+    .eventsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .quickLinks {
+        grid-template-columns: 1fr;
+    }
+}

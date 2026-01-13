@@ -140,7 +140,14 @@ export default function EventPage() {
             <TopBar user={user}/>
             <div className="eventHeader">
                 {event.bannerPath && (
-                    <img src={event.bannerPath} alt={event.name} className="eventBanner" />
+                    <img 
+                        src={`http://localhost:8080${event.bannerPath}`} 
+                        alt={event.name} 
+                        className="eventBanner"
+                        onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                        }}
+                    />
                 )}
                 <div className="eventInfo">
                     <h1>{event.name}</h1>
