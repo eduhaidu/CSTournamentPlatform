@@ -19,4 +19,5 @@ public class MatchData {
     private String winner;
     private List<MapData> maps;
     private LocalDateTime matchDate;
+    private Integer totalMaps; // Total number of maps (Best of X)
 }

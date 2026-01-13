@@ -42,7 +42,7 @@ export default function MatchDetails({
         const fetchMaps = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get(`/api/maps/match/${matchId}`);
+                const response = await axios.get(`/maps/match/${matchId}`);
                 setMaps(response.data);
             } catch (error) {
                 console.error("Error fetching maps:", error);

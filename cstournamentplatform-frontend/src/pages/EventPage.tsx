@@ -60,7 +60,7 @@ export default function EventPage() {
     useEffect(()=>{
         const fetchMatches = async () => {
             try {
-                const response = await axios.get(`/api/matches/tournament/${eventId}`);
+                const response = await axios.get(`/matches/tournament/${eventId}`);
                 setMatches(response.data);
             } catch (error) {
                 console.error("Error fetching matches:", error);
@@ -72,7 +72,7 @@ export default function EventPage() {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const response = await axios.get('/api/teams');
+                const response = await axios.get('/teams/all');
                 setTeams(response.data);
             } catch (error) {
                 console.error("Error fetching teams:", error);
@@ -110,11 +110,11 @@ export default function EventPage() {
                         teams: [
                             { 
                                 name: teamA?.name || 'TBD', 
-                                score: match.teamAScore || 0 
+                                score: match.teamAScore ?? 0 
                             },
                             { 
                                 name: teamB?.name || 'TBD', 
-                                score: match.teamBScore || 0 
+                                score: match.teamBScore ?? 0 
                             }
                         ]
                     };
@@ -155,27 +155,34 @@ export default function EventPage() {
                 {bracketRounds.length > 0 ? (
                     <Bracket 
                         rounds={bracketRounds}
-                        renderSeedComponent={(props) => (
-                            <div 
-                                className="bracket-seed-wrapper"
-                                onClick={() => handleMatchClick(props.seed.id as number)}
-                                style={{ cursor: 'pointer' }}
-                            >
-                                <div className="bracket-seed-info">
-                                    <div className="bracket-team">
-                                        <span className="bracket-team-name">{props.seed.teams[0]?.name}</span>
-                                        <span className="bracket-team-score">{props.seed.teams[0]?.score}</span>
+                        renderSeedComponent={(props) => {
+                            const team1Score = props.seed.teams[0]?.score || 0;
+                            const team2Score = props.seed.teams[1]?.score || 0;
+                            const team1Wins = team1Score > team2Score;
+                            const team2Wins = team2Score > team1Score;
+                            
+                            return (
+                                <div 
+                                    className="bracket-seed-wrapper"
+                                    onClick={() => handleMatchClick(props.seed.id as number)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <div className="bracket-seed-info">
+                                        <div className={`bracket-team ${team1Wins ? 'winner' : team2Wins ? 'loser' : ''}`}>
+                                            <span className="bracket-team-name">{props.seed.teams[0]?.name}</span>
+                                            <span className="bracket-team-score">{props.seed.teams[0]?.score}</span>
+                                        </div>
+                                        <div className={`bracket-team ${team2Wins ? 'winner' : team1Wins ? 'loser' : ''}`}>
+                                            <span className="bracket-team-name">{props.seed.teams[1]?.name}</span>
+                                            <span className="bracket-team-score">{props.seed.teams[1]?.score}</span>
+                                        </div>
                                     </div>
-                                    <div className="bracket-team">
-                                        <span className="bracket-team-name">{props.seed.teams[1]?.name}</span>
-                                        <span className="bracket-team-score">{props.seed.teams[1]?.score}</span>
-                                    </div>
-                                </div>
                                 {props.seed.date && (
                                     <div className="bracket-seed-date">{props.seed.date}</div>
                                 )}
                             </div>
-                        )}
+                        );
+                        }}
                     />
                 ) : (
                     <p>No playoff matches available</p>

@@ -45,10 +45,19 @@ export default function EventsManager() {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: name === 'prizePool' ? parseFloat(value) || 0 : value
-        }));
+        if (name === 'prizePool') {
+            // Allow empty string for better UX when clearing the field
+            const numValue = value === '' ? 0 : parseFloat(value);
+            setFormData(prev => ({
+                ...prev,
+                [name]: isNaN(numValue) ? 0 : numValue
+            }));
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: value
+            }));
+        }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -260,13 +269,12 @@ export default function EventsManager() {
                         <div className="formGroup">
                             <label htmlFor="prizePool">Prize Pool ($)</label>
                             <input
-                                type="number"
+                                type="text"
                                 id="prizePool"
                                 name="prizePool"
-                                value={formData.prizePool}
+                                value={formData.prizePool === 0 ? '' : formData.prizePool}
                                 onChange={handleInputChange}
-                                step="0.01"
-                                min="0"
+                                placeholder="e.g., 250000"
                             />
                         </div>
 

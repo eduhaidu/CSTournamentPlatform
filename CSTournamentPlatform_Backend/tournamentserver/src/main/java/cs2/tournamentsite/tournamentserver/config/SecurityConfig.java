@@ -34,8 +34,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless JWT authentication
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/ws/**", "/uploads/**").permitAll() // Allow access to auth, WebSocket, and uploaded files
-                .requestMatchers("/api/events/**", "/api/teams/**", "/api/matches/**", "/api/maps/**").permitAll() // Allow public access to events, teams, matches, and maps
-                .requestMatchers("/events/**", "/teams/**", "/matches/**", "/maps/**").permitAll() // Allow legacy endpoints
+                .requestMatchers("/api/events/**", "/api/teams/**", "/api/matches/**", "/api/maps/**", "/api/players/**").permitAll() // Allow public access to events, teams, matches, maps, and players
+                .requestMatchers("/events/**", "/teams/**", "/matches/**", "/maps/**", "/players/**").permitAll() // Allow legacy endpoints
                 .anyRequest().authenticated() // All other requests require authentication
             )
             .sessionManagement(session -> session

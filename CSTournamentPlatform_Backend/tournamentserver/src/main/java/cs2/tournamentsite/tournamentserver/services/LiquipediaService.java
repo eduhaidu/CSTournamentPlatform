@@ -115,10 +115,15 @@ public class LiquipediaService {
             String organizer = extractInfoboxValue(wikiContent, "organizer");
             builder.organizer(organizer);
 
-            // Parse prize pool
-            String prizePoolStr = extractInfoboxValue(wikiContent, "prizepool");
-            if (prizePoolStr != null) {
-                builder.prizePool(parsePrizePool(prizePoolStr));
+            // Parse prize pool - try prizepoolusd first, then prizepool
+            String prizePoolStr = extractInfoboxValue(wikiContent, "prizepoolusd");
+            if (prizePoolStr == null || prizePoolStr.isEmpty()) {
+                prizePoolStr = extractInfoboxValue(wikiContent, "prizepool");
+            }
+            if (prizePoolStr != null && !prizePoolStr.isEmpty()) {
+                Double prizePool = parsePrizePool(prizePoolStr);
+                builder.prizePool(prizePool);
+                log.info("Parsed prize pool: ${}", prizePool);
             }
 
             // Extract description (first paragraph after infobox)
@@ -259,22 +264,14 @@ public class LiquipediaService {
                 log.warn("Could not save debug file: {}", e.getMessage());
             }
 
-            // Parse country
-            String country = extractInfoboxValue(wikiContent, "country");
-            builder.country(country);
+        // Parse location - try "location" first (Liquipedia standard), then fall back to "country"
+        String location = extractInfoboxValue(section, "location");
+        if (location == null || location.isEmpty()) {
+            location = extractInfoboxValue(section, "country");
+        }
+        builder.country(location);
 
-            // Parse founded date
-            String foundedStr = extractInfoboxValue(wikiContent, "founded");
-            if (foundedStr != null) {
-                builder.foundedOn(parseLocalDate(foundedStr));
-            }
-
-            // Parse coach
-            String coach = extractInfoboxValue(wikiContent, "coach");
-            builder.coachName(coach);
-
-            // Parse active players from roster section
-            List<PlayerData> players = parseActivePlayers(wikiContent);
+        List<PlayerData> players = parseActivePlayers(wikiContent);
             builder.players(players);
 
             return builder.build();
@@ -283,6 +280,7 @@ public class LiquipediaService {
             log.error("Error parsing team data", e);
             return null;
         }
+        
     }
 
     /**
@@ -526,12 +524,13 @@ public class LiquipediaService {
     }
 
     /**
-     * Fetches a player's individual page and extracts their photo filename
+     * Fetches a player's individual page and extracts detailed information
+     * Enhances the basic roster data with role, birth date, and photo from player's infobox
      * 
      * @param playerNickname The player's nickname/ID
-     * @return The image filename from the player's infobox, or null if not found
+     * @return PlayerData with enhanced information from player page, or null if fetch fails
      */
-    public String getPlayerPhotoFilename(String playerNickname) {
+    public PlayerData getPlayerDetailedInfo(String playerNickname) {
         try {
             log.info("Fetching player page for: {}", playerNickname);
 
@@ -541,21 +540,81 @@ public class LiquipediaService {
                 return null;
             }
 
-            // Extract image from infobox
-            // Pattern: |image=filename
-            String imageFilename = extractInfoboxValue(wikiContent, "image");
-            if (imageFilename != null && !imageFilename.isEmpty()) {
-                log.info("Found photo for {}: {}", playerNickname, imageFilename);
-                return imageFilename;
+            // Extract Infobox player section
+            String infoboxSection = extractTemplateSection(wikiContent, "Infobox player");
+            if (infoboxSection == null || infoboxSection.isEmpty()) {
+                log.warn("No Infobox player found for: {}", playerNickname);
+                return null;
             }
 
-            log.warn("No image found in infobox for player: {}", playerNickname);
-            return null;
+            PlayerData.PlayerDataBuilder builder = PlayerData.builder();
+            
+            // Parse nickname (id field)
+            String id = extractInfoboxValue(infoboxSection, "id");
+            builder.nickname(id != null ? id : playerNickname);
+            
+            // Parse full name
+            String fullName = extractInfoboxValue(infoboxSection, "name");
+            if (fullName != null && !fullName.isEmpty()) {
+                String[] nameParts = fullName.split("\\s+", 2);
+                builder.firstName(nameParts[0]);
+                builder.lastName(nameParts.length > 1 ? nameParts[1] : "");
+                builder.realName(fullName);
+            }
+            
+            // Parse country
+            String country = extractInfoboxValue(infoboxSection, "country");
+            builder.country(country != null ? country : "");
+            
+            // Parse role(s) - can be multiple separated by comma
+            String roles = extractInfoboxValue(infoboxSection, "roles");
+            if (roles == null || roles.isEmpty()) {
+                roles = extractInfoboxValue(infoboxSection, "role");
+            }
+            if (roles != null && !roles.isEmpty()) {
+                // Take first role if multiple, capitalize for consistency
+                String primaryRole = roles.split(",")[0].trim();
+                primaryRole = primaryRole.substring(0, 1).toUpperCase() + primaryRole.substring(1).toLowerCase();
+                builder.role(primaryRole);
+                log.info("Found role '{}' for player {}", primaryRole, playerNickname);
+            }
+            
+            // Parse birth date
+            String birthDateStr = extractInfoboxValue(infoboxSection, "birth_date");
+            if (birthDateStr != null && !birthDateStr.isEmpty()) {
+                try {
+                    LocalDate birthDate = LocalDate.parse(birthDateStr);
+                    // Store birth date (could be used to calculate age)
+                    log.debug("Player {} birth date: {}", playerNickname, birthDate);
+                } catch (Exception e) {
+                    log.warn("Could not parse birth date for {}: {}", playerNickname, birthDateStr);
+                }
+            }
+            
+            // Parse photo
+            String photo = extractInfoboxValue(infoboxSection, "image");
+            if (photo != null && !photo.isEmpty()) {
+                builder.photoUrl(photo);
+                log.info("Found photo for {}: {}", playerNickname, photo);
+            }
+            
+            return builder.build();
 
         } catch (Exception e) {
-            log.error("Error fetching player photo for: {}", playerNickname, e);
+            log.error("Error fetching player details for: {}", playerNickname, e);
             return null;
         }
+    }
+    
+    /**
+     * Fetches a player's individual page and extracts their photo filename
+     * 
+     * @param playerNickname The player's nickname/ID
+     * @return The image filename from the player's infobox, or null if not found
+     */
+    public String getPlayerPhotoFilename(String playerNickname) {
+        PlayerData playerData = getPlayerDetailedInfo(playerNickname);
+        return playerData != null ? playerData.getPhotoUrl() : null;
     }
 
     public String extractTemplateSection(String content, String prefix) {
@@ -646,23 +705,47 @@ public class LiquipediaService {
             String teamBSection = extractTemplateParam(matchTemplate, "opponent2");
             String teamA = null;
             String teamB = null;
+            
+            log.debug("Team A section: {}", teamASection);
+            log.debug("Team B section: {}", teamBSection);
+            
             if (teamASection != null) {
-                String TeamOpponentTemplate = extractTemplateSection(teamASection, "TeamOpponent");
-                if (TeamOpponentTemplate != null) {
-                    Pattern namePattern = Pattern.compile("TeamOpponent\\|(\\w+)");
-                    Matcher nameMatcher = namePattern.matcher(TeamOpponentTemplate);
-                    if (nameMatcher.find()) {
-                        teamA = nameMatcher.group(1).trim();
+                // Try direct pattern match first: {{TeamOpponent|teamname}}
+                Pattern directPattern = Pattern.compile("\\{\\{TeamOpponent\\|([^}|]+)");
+                Matcher directMatcher = directPattern.matcher(teamASection);
+                if (directMatcher.find()) {
+                    teamA = directMatcher.group(1).trim();
+                    log.info("Extracted team A: {}", teamA);
+                } else {
+                    // Fallback to template section extraction
+                    String TeamOpponentTemplate = extractTemplateSection(teamASection, "TeamOpponent");
+                    if (TeamOpponentTemplate != null) {
+                        Pattern namePattern = Pattern.compile("TeamOpponent\\|(\\w+)");
+                        Matcher nameMatcher = namePattern.matcher(TeamOpponentTemplate);
+                        if (nameMatcher.find()) {
+                            teamA = nameMatcher.group(1).trim();
+                            log.info("Extracted team A (fallback): {}", teamA);
+                        }
                     }
                 }
             }
             if (teamBSection != null) {
-                String TeamOpponentTemplate = extractTemplateSection(teamBSection, "TeamOpponent");
-                if (TeamOpponentTemplate != null) {
-                    Pattern namePattern = Pattern.compile("TeamOpponent\\|(\\w+)");
-                    Matcher nameMatcher = namePattern.matcher(TeamOpponentTemplate);
-                    if (nameMatcher.find()) {
-                        teamB = nameMatcher.group(1).trim();
+                // Try direct pattern match first: {{TeamOpponent|teamname}}
+                Pattern directPattern = Pattern.compile("\\{\\{TeamOpponent\\|([^}|]+)");
+                Matcher directMatcher = directPattern.matcher(teamBSection);
+                if (directMatcher.find()) {
+                    teamB = directMatcher.group(1).trim();
+                    log.info("Extracted team B: {}", teamB);
+                } else {
+                    // Fallback to template section extraction
+                    String TeamOpponentTemplate = extractTemplateSection(teamBSection, "TeamOpponent");
+                    if (TeamOpponentTemplate != null) {
+                        Pattern namePattern = Pattern.compile("TeamOpponent\\|(\\w+)");
+                        Matcher nameMatcher = namePattern.matcher(TeamOpponentTemplate);
+                        if (nameMatcher.find()) {
+                            teamB = nameMatcher.group(1).trim();
+                            log.info("Extracted team B (fallback): {}", teamB);
+                        }
                     }
                 }
             }
@@ -670,6 +753,16 @@ public class LiquipediaService {
             if (matchDateStr != null) {
                 builder.matchDate(parseDate(matchDateStr).toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime());
             }
+            
+            // Count total map elements to determine Best of X (count all |mapN= patterns)
+            Pattern mapCountPattern = Pattern.compile("\\|map\\d+=");
+            Matcher mapCountMatcher = mapCountPattern.matcher(matchTemplate);
+            int totalMapCount = 0;
+            while (mapCountMatcher.find()) {
+                totalMapCount++;
+            }
+            builder.totalMaps(totalMapCount);
+            
             // Parse maps
             Pattern mapPattern = Pattern.compile("\\|map(\\d+)=");
             Matcher mapMatcher = mapPattern.matcher(matchTemplate);
@@ -771,6 +864,11 @@ public class LiquipediaService {
         
         // Handle special cases like Third Place Match (RxMTP identifier)
         return "Playoffs";
+    }
+
+    public PlayerData parsePlayerPage(String nickname) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'parsePlayerPage'");
     }
 
 }

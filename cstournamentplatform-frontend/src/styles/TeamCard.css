@@ -15,3 +15,9 @@
     object-fit: contain;
     margin-bottom: 12px;
 }
+
+.countryFlag {
+    font-size: 1.2em;
+    margin-left: 4px;
+    cursor: help;
+}

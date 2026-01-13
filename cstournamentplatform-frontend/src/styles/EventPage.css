@@ -40,58 +40,86 @@
 .playoffsBracket {
     margin-top: 30px;
     overflow-x: auto;
-    padding: 20px;
-    background: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    background: #1a1a1a;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .playoffsBracket h2 {
     margin-top: 0;
-    margin-bottom: 20px;
-    color: #2c3e50;
+    margin-bottom: 30px;
+    color: #ffffff;
+    text-align: center;
+    font-size: 2rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* React-brackets styling */
 .bracket {
     display: flex;
-    gap: 40px;
-    padding: 20px 0;
+    gap: 80px;
+    padding: 40px 20px;
+    position: relative;
+    align-items: center;
 }
 
 .bracket-round {
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    min-width: 200px;
+    justify-content: space-evenly;
+    min-width: 280px;
+    position: relative;
+    gap: 40px;
 }
 
 .bracket-round-title {
-    font-weight: 600;
-    font-size: 1.1rem;
-    margin-bottom: 20px;
-    color: #2c3e50;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 40px;
+    color: #ffffff;
     text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    background: rgba(102, 126, 234, 0.2);
+    padding: 14px 20px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(102, 126, 234, 0.3);
 }
 
 .bracket-seed {
-    background: white;
-    border: 2px solid #e0e0e0;
-    border-radius: 6px;
-    margin: 10px 0;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border: 3px solid #1a252f;
+    border-radius: 12px;
+    margin: 15px 0;
     overflow: hidden;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    position: relative;
+    min-height: 120px;
+}
+
+.bracket-seed::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
 }
 
 .bracket-seed:hover {
-    border-color: #3498db;
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
-    transform: translateY(-2px);
+    border-color: #667eea;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6);
+    transform: translateY(-4px) scale(1.02);
 }
 
 .bracket-seed:active {
-    transform: translateY(0);
+    transform: translateY(-2px) scale(1.01);
 }
 
 .bracket-seed-wrapper {
@@ -102,31 +130,82 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 18px 24px;
+    border-bottom: 2px solid #1a252f;
+    transition: all 0.2s ease;
+    background: transparent;
+    position: relative;
+    min-height: 60px;
+}
+
+.bracket-team:hover {
+    background: rgba(102, 126, 234, 0.15);
 }
 
 .bracket-team:last-child {
     border-bottom: none;
 }
 
+.bracket-team.winner {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.3) 0%, rgba(102, 126, 234, 0.15) 100%);
+    border-left: 5px solid #667eea;
+    padding-left: 19px;
+}
+
+.bracket-team.winner .bracket-team-name {
+    color: #7c9aff;
+    font-weight: 700;
+}
+
+.bracket-team.winner .bracket-team-score {
+    background: #667eea;
+    color: white;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+}
+
+.bracket-team.loser {
+    opacity: 0.55;
+}
+
+.bracket-team.loser .bracket-team-name {
+    color: #95a5a6;
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+}
+
 .bracket-team-name {
-    font-weight: 500;
-    color: #2c3e50;
+    font-weight: 600;
+    color: #ecf0f1;
+    font-size: 1.05rem;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 12px;
 }
 
 .bracket-team-score {
     font-weight: 700;
-    color: #3498db;
-    margin-left: 10px;
+    color: #ffffff;
+    margin-left: 16px;
+    font-size: 1.3rem;
+    min-width: 40px;
+    text-align: center;
+    padding: 6px 14px;
+    background: rgba(102, 126, 234, 0.4);
+    border-radius: 8px;
+    transition: all 0.2s ease;
 }
 
 .bracket-seed-date {
-    font-size: 0.85rem;
-    color: #7f8c8d;
+    font-size: 0.9rem;
+    color: #bdc3c7;
     text-align: center;
-    padding: 8px;
-    background: #f8f9fa;
+    padding: 12px;
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    font-weight: 500;
+    border-top: 1px solid #1a252f;
 }
 
 /* Mobile responsive */

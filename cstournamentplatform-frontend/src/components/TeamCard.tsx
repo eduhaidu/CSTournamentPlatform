@@ -1,4 +1,5 @@
 import "../styles/TeamCard.css";
+import { getCountryFlag } from "../utils/countryFlags";
 
 interface Player {
     id: number;
@@ -45,7 +46,11 @@ export default function TeamCard({ name, members, logoPath }: { name: string; me
                             />
                         )}
                         {member.nickname} {member.role && `(${member.role})`}
-                        {member.country && ` - ${member.country}`}
+                        {member.country && (
+                            <span className="countryFlag" title={member.country}>
+                                {' '}{getCountryFlag(member.country)}
+                            </span>
+                        )}
                     </li>
                 ))
             ) : (

@@ -11,6 +11,7 @@ import Liquipedia from './pages/Liquipedia';
 import TeamsList from './pages/TeamsList';
 import EventsManager from './pages/Admin/EventsManager';
 import TeamsManager from './pages/Admin/TeamsManager';
+import MatchesManager from './pages/Admin/MatchesManager';
 import EventPage from './pages/EventPage';
 import EventCalendar from './pages/EventCalendar';
 
@@ -31,6 +32,7 @@ function App() {
           <Route path="/admin/liquipedia" element={<Liquipedia />} />
           <Route path="/admin/events" element={<EventsManager />} />
           <Route path="/admin/teams" element={<TeamsManager />} />
+          <Route path="/admin/matches" element={<MatchesManager />} />
         </Routes>
       </Router>
     </AuthProvider>

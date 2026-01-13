@@ -82,7 +82,7 @@ public class LiquipediaImportService {
 
             if(tournamentData.getMatches() != null && !tournamentData.getMatches().isEmpty()){
                 int importedMatches = 0;
-                int importedMaps = 0;
+                int totalMapsSaved = 0;
                 int totalMatches = tournamentData.getMatches().size();
                 
                 for(MatchData matchData : tournamentData.getMatches()){
@@ -110,39 +110,48 @@ public class LiquipediaImportService {
                             match.setStage("Playoffs");
                         }
                         
+                        // Set match type based on total maps in template
+                        int bestOfMaps = matchData.getTotalMaps() != null ? matchData.getTotalMaps() : 0;
+                        if(bestOfMaps == 1){
+                            match.setMatchType("Best of 1");
+                        } else if(bestOfMaps > 1){
+                            match.setMatchType("Best of " + bestOfMaps);
+                        } else {
+                            match.setMatchType("Unknown");
+                        }
+                        
+                        // Save match first to get ID for maps
+                        match = matchService.saveMatch(match);
+                        
                         if(matchData.getMaps() != null && !matchData.getMaps().isEmpty()){
-                            
+                            int savedMapsForMatch = 0;
                             for(MapData mapData : matchData.getMaps()){
                                 try {
                                     Map map = new Map();
                                     map.setMapName(mapData.getMapName());
                                     map.setMatchId(match.getId());
-                                    map.setTeamACTRounds(mapData.getTeamBCTSideScore());
+                                    map.setTeamACTRounds(mapData.getTeamACTSideScore());
                                     map.setTeamBTRounds(mapData.getTeamBTSideScore());
                                     map.setTeamATRounds(mapData.getTeamATSideScore());
                                     map.setTeamBCTRounds(mapData.getTeamBCTSideScore());
                                     map.setTeamAFinalScore(mapData.getTeamAFinalScore());
                                     map.setTeamBFinalScore(mapData.getTeamBFinalScore());
                                     mapService.saveMap(map);
-                                    importedMaps++;
+                                    savedMapsForMatch++;
+                                    totalMapsSaved++;
                                 } catch (Exception e) {
-
+                                    log.warn("Failed to save map for match {}: {}", match.getId(), e.getMessage());
                                 }
                             }
+                            log.debug("Saved {} maps for match {} (Best of {})", savedMapsForMatch, match.getId(), bestOfMaps);
                         }
-                        if(importedMaps == 1){
-                            match.setMatchType("Best of 1");
-                        } else if(importedMaps > 1){
-                            match.setMatchType("Best of " + importedMaps);
-                        } else {
-                            match.setMatchType("Unknown");
-                        }
-                        matchService.saveMatch(match);
+                        
                         importedMatches++;
                     } catch (Exception e) {
+                        log.warn("Failed to import match: {}", e.getMessage());
                     }
                 }
-                log.info("Imported {} matches with a total of {} maps for tournament {}", importedMatches, importedMaps, savedEvent.getName());
+                log.info("Imported {} matches with a total of {} maps for tournament {}", importedMatches, totalMapsSaved, savedEvent.getName());
             }
 
             return savedEvent;
@@ -206,32 +215,56 @@ public class LiquipediaImportService {
             // Import players for this team
             if (teamData.getPlayers() != null && !teamData.getPlayers().isEmpty()) {
                 int importedPlayers = 0;
-                for (PlayerData playerData : teamData.getPlayers()) {
+                for (PlayerData rosterPlayerData : teamData.getPlayers()) {
                     try {
+                        // Fetch detailed player info from individual player page
+                        PlayerData detailedPlayerData = liquipediaService.getPlayerDetailedInfo(rosterPlayerData.getNickname());
+                        
+                        // Merge data: prefer detailed data, fall back to roster data
+                        PlayerData finalPlayerData;
+                        if (detailedPlayerData != null) {
+                            // Use detailed data but keep join date from roster if not in player page
+                            finalPlayerData = PlayerData.builder()
+                                .nickname(detailedPlayerData.getNickname())
+                                .firstName(detailedPlayerData.getFirstName() != null ? detailedPlayerData.getFirstName() : rosterPlayerData.getFirstName())
+                                .lastName(detailedPlayerData.getLastName() != null ? detailedPlayerData.getLastName() : rosterPlayerData.getLastName())
+                                .realName(detailedPlayerData.getRealName() != null ? detailedPlayerData.getRealName() : rosterPlayerData.getRealName())
+                                .country(detailedPlayerData.getCountry() != null && !detailedPlayerData.getCountry().isEmpty() ? detailedPlayerData.getCountry() : rosterPlayerData.getCountry())
+                                .role(detailedPlayerData.getRole() != null ? detailedPlayerData.getRole() : rosterPlayerData.getRole())
+                                .joinDate(rosterPlayerData.getJoinDate()) // Always use roster join date
+                                .isIGL(rosterPlayerData.isIGL())
+                                .photoUrl(detailedPlayerData.getPhotoUrl())
+                                .build();
+                            log.info("Enhanced player data for {} with info from player page (role: {})", 
+                                rosterPlayerData.getNickname(), finalPlayerData.getRole());
+                        } else {
+                            // Fall back to roster data if player page fetch fails
+                            finalPlayerData = rosterPlayerData;
+                            log.info("Using roster data for {} (player page unavailable)", rosterPlayerData.getNickname());
+                        }
+                        
                         Player player = new Player();
-                        player.setNickname(playerData.getNickname());
-                        player.setFirstName(playerData.getFirstName() != null ? playerData.getFirstName() : "");
-                        player.setLastName(playerData.getLastName() != null ? playerData.getLastName() : "");
-                        player.setCountry(playerData.getCountry() != null ? playerData.getCountry() : "");
+                        player.setNickname(finalPlayerData.getNickname());
+                        player.setFirstName(finalPlayerData.getFirstName() != null ? finalPlayerData.getFirstName() : "");
+                        player.setLastName(finalPlayerData.getLastName() != null ? finalPlayerData.getLastName() : "");
+                        player.setCountry(finalPlayerData.getCountry() != null ? finalPlayerData.getCountry() : "");
                         player.setTeamId(savedTeam.getId());
-                        player.setRole(playerData.getRole() != null ? playerData.getRole() : "Player");
-                        player.setJoinedOn(playerData.getJoinDate() != null ? playerData.getJoinDate()
+                        player.setRole(finalPlayerData.getRole() != null ? finalPlayerData.getRole() : "Player");
+                        player.setJoinedOn(finalPlayerData.getJoinDate() != null ? finalPlayerData.getJoinDate()
                                 : java.time.LocalDate.now());
-                        player.setDateOfBirth(java.time.LocalDate.now().minusYears(20)); // Default age ~20, not
-                                                                                         // available in Liquipedia
+                        player.setDateOfBirth(java.time.LocalDate.now().minusYears(20)); // Default age ~20
 
-                        // Fetch and download player photo from their individual page
-                        try {
-                            String photoFilename = liquipediaService.getPlayerPhotoFilename(playerData.getNickname());
-                            if (photoFilename != null) {
-                                String photoPath = liquipediaImageService.downloadPlayerPhoto(photoFilename);
+                        // Download player photo if available
+                        if (finalPlayerData.getPhotoUrl() != null && !finalPlayerData.getPhotoUrl().isEmpty()) {
+                            try {
+                                String photoPath = liquipediaImageService.downloadPlayerPhoto(finalPlayerData.getPhotoUrl());
                                 player.setPhotoPath(photoPath != null ? photoPath : "");
-                            } else {
+                            } catch (Exception e) {
+                                log.warn("Failed to download photo for player {}: {}", finalPlayerData.getNickname(),
+                                        e.getMessage());
                                 player.setPhotoPath("");
                             }
-                        } catch (Exception e) {
-                            log.warn("Failed to download photo for player {}: {}", playerData.getNickname(),
-                                    e.getMessage());
+                        } else {
                             player.setPhotoPath("");
                         }
 
@@ -239,7 +272,7 @@ public class LiquipediaImportService {
                         importedPlayers++;
                         log.debug("Imported player: {} for team {}", player.getNickname(), savedTeam.getName());
                     } catch (Exception e) {
-                        log.warn("Failed to import player {}: {}", playerData.getNickname(), e.getMessage());
+                        log.warn("Failed to import player {}: {}", rosterPlayerData.getNickname(), e.getMessage());
                     }
                 }
                 log.info("Imported {} players for team {}", importedPlayers, savedTeam.getName());

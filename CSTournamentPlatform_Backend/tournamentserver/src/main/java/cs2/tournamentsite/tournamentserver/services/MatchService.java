@@ -35,6 +35,7 @@ public class MatchService {
             existingMatch.setTeamBScore(updatedMatch.getTeamBScore());
             existingMatch.setWinnerTeamId(updatedMatch.getWinnerTeamId());
             existingMatch.setMatchType(updatedMatch.getMatchType());
+            existingMatch.setStage(updatedMatch.getStage());
             return matchRepository.save(existingMatch);
         }).orElse(null);
     }

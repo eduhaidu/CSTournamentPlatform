@@ -39,9 +39,11 @@ public class TeamService {
     public Team updateTeam(Object id, Team updatedTeam) {
         return teamRepository.findById(id).map(existingTeam -> {
             existingTeam.setName(updatedTeam.getName());
+            existingTeam.setAlias(updatedTeam.getAlias());
             existingTeam.setCoachName(updatedTeam.getCoachName());
             existingTeam.setFoundedOn(updatedTeam.getFoundedOn());
             existingTeam.setCountry(updatedTeam.getCountry());
+            existingTeam.setLogoPath(updatedTeam.getLogoPath());
             return teamRepository.save(existingTeam);
         }).orElse(null);
     }
